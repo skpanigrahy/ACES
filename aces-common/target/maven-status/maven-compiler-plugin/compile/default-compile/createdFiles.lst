@@ -1,0 +1,6 @@
+com\aces\common\model\Decision$DecisionBuilder.class
+com\aces\common\model\EvaluationResult.class
+com\aces\common\model\Signal.class
+com\aces\common\util\CorrelationIDGenerator.class
+com\aces\common\exception\ACESException.class
+com\aces\common\model\Decision.class

@@ -1,0 +1,7 @@
+com\aces\ingestion\service\ValidationService.class
+com\aces\ingestion\controller\HealthController.class
+com\aces\ingestion\controller\SignalController.class
+com\aces\ingestion\IngestionApplication.class
+com\aces\ingestion\client\EvaluationClient.class
+com\aces\ingestion\config\IngestionConfig.class
+com\aces\ingestion\service\IngestionService.class

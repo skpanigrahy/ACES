@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ACES — Complete Architecture Diagrams</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0d14;
+  --surface:#0f1520;
+  --card:#131c28;
+  --border:#1e2d40;
+  --border2:#253447;
+  --amber:#f59e0b;
+  --amber2:#fbbf24;
+  --amberDim:rgba(245,158,11,0.12);
+  --blue:#38bdf8;
+  --blueDim:rgba(56,189,248,0.12);
+  --green:#34d399;
+  --greenDim:rgba(52,211,153,0.12);
+  --red:#f87171;
+  --redDim:rgba(248,113,113,0.12);
+  --purple:#a78bfa;
+  --purpleDim:rgba(167,139,250,0.12);
+  --oracle:#fb923c;
+  --oracleDim:rgba(251,146,60,0.12);
+  --teal:#2dd4bf;
+  --tealDim:rgba(45,212,191,0.12);
+  --text:#e2eaf5;
+  --muted:#4a6080;
+  --dim:#1a2535;
+  --font:'Space Grotesk',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+
+/* ── NAV ── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,13,20,0.95);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;gap:0;
+  padding:0 20px;height:48px;
+  overflow-x:auto;
+}
+.nav-brand{
+  display:flex;align-items:center;gap:8px;
+  margin-right:24px;flex-shrink:0;
+}
+.nav-logo{
+  width:26px;height:26px;border-radius:5px;
+  background:linear-gradient(135deg,var(--amber),#b45309);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#000;font-family:var(--mono);
+}
+.nav-name{font-size:12px;font-weight:700;color:var(--amber);letter-spacing:0.5px;}
+.nav-btn{
+  padding:0 14px;height:48px;border:none;background:none;
+  font-family:var(--font);font-size:11px;font-weight:500;
+  color:var(--muted);cursor:pointer;letter-spacing:0.5px;
+  border-bottom:2px solid transparent;transition:all 0.2s;
+  white-space:nowrap;flex-shrink:0;
+}
+.nav-btn.active{color:var(--amber);border-bottom-color:var(--amber);}
+.nav-btn:hover{color:var(--text);}
+
+/* ── PAGES ── */
+.page{display:none;padding:24px 20px 60px;max-width:1400px;margin:0 auto;}
+.page.active{display:block;}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:28px;}
+.page-tag{
+  display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  padding:3px 10px;border-radius:3px;margin-bottom:10px;
+}
+.tag-amber{background:var(--amberDim);color:var(--amber);border:1px solid rgba(245,158,11,0.3);}
+.tag-blue{background:var(--blueDim);color:var(--blue);border:1px solid rgba(56,189,248,0.3);}
+.tag-green{background:var(--greenDim);color:var(--green);border:1px solid rgba(52,211,153,0.3);}
+.tag-purple{background:var(--purpleDim);color:var(--purple);border:1px solid rgba(167,139,250,0.3);}
+.tag-oracle{background:var(--oracleDim);color:var(--oracle);border:1px solid rgba(251,146,60,0.3);}
+.tag-teal{background:var(--tealDim);color:var(--teal);border:1px solid rgba(45,212,191,0.3);}
+.page-title{font-size:26px;font-weight:700;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:700px;}
+
+/* ── DIAGRAM CONTAINERS ── */
+.diag-wrap{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:24px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+}
+.diag-title{
+  font-family:var(--mono);font-size:10px;letter-spacing:2px;
+  color:var(--muted);margin-bottom:20px;font-weight:600;
+}
+
+/* ══ C1 CONTEXT DIAGRAM ══ */
+.c1-wrap{position:relative;min-height:600px;}
+
+.c1-center{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.08));
+  border:2px solid var(--amber);border-radius:14px;
+  width:280px;padding:24px;text-align:center;
+  box-shadow:0 0 40px rgba(245,158,11,0.2);
+  z-index:10;
+}
+.c1-center-name{font-size:28px;font-weight:700;color:var(--amber);margin-bottom:4px;}
+.c1-center-full{font-size:10px;color:rgba(245,158,11,0.7);font-family:var(--mono);letter-spacing:1px;margin-bottom:10px;}
+.c1-center-desc{font-size:11px;color:var(--muted);line-height:1.6;}
+
+.c1-actor{
+  position:absolute;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;text-align:center;
+  min-width:130px;z-index:5;
+}
+.c1-actor-icon{font-size:22px;margin-bottom:6px;}
+.c1-actor-name{font-size:11px;font-weight:700;margin-bottom:3px;}
+.c1-actor-desc{font-size:9px;color:var(--muted);line-height:1.4;}
+.c1-actor-type{
+  font-family:var(--mono);font-size:8px;letter-spacing:1px;
+  padding:1px 6px;border-radius:2px;display:inline-block;margin-top:5px;
+}
+
+/* SVG connector lines */
+.c1-svg{position:absolute;inset:0;pointer-events:none;z-index:1;}
+
+/* ══ C2 CONTAINER ══ */
+.c2-outer{
+  border:2px solid var(--amber);border-radius:14px;
+  padding:20px;background:rgba(245,158,11,0.02);
+  position:relative;margin-bottom:16px;
+}
+.c2-outer-label{
+  position:absolute;top:-11px;left:20px;
+  background:var(--bg);padding:0 8px;
+  font-family:var(--mono);font-size:9px;color:var(--amber);
+  letter-spacing:2px;font-weight:700;
+}
+.c2-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.c2-box{
+  border-radius:10px;padding:16px;border:1px solid;
+  position:relative;
+}
+.c2-box-name{font-size:12px;font-weight:700;margin-bottom:4px;}
+.c2-box-tech{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:8px;letter-spacing:0.5px;}
+.c2-box-desc{font-size:10px;color:var(--muted);line-height:1.6;}
+.c2-badge{
+  position:absolute;top:8px;right:8px;
+  font-family:var(--mono);font-size:7px;letter-spacing:1px;
+  padding:1px 5px;border-radius:2px;
+}
+.c2-arrow-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0;font-size:11px;color:var(--muted);font-family:var(--mono);}
+.c2-arrow{color:var(--amber);font-size:16px;}
+.c2-ext{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;}
+.c2-ext-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:10px;text-align:center;
+}
+.c2-ext-icon{font-size:18px;margin-bottom:4px;}
+.c2-ext-name{font-size:10px;font-weight:600;margin-bottom:2px;}
+.c2-ext-desc{font-size:8.5px;color:var(--muted);}
+
+/* ══ C3 COMPONENT ══ */
+.c3-module{
+  border-radius:12px;border:1px solid;padding:18px;margin-bottom:16px;
+}
+.c3-module-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+.c3-module-icon{font-size:22px;}
+.c3-module-name{font-size:15px;font-weight:700;}
+.c3-module-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.c3-components{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+.c3-comp{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:12px;
+  border-left:3px solid;
+}
+.c3-comp-name{font-size:11px;font-weight:700;margin-bottom:3px;}
+.c3-comp-type{font-family:var(--mono);font-size:8.5px;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px;}
+.c3-comp-desc{font-size:10px;color:var(--muted);line-height:1.5;}
+.c3-comp-collab{font-size:8.5px;color:var(--muted);margin-top:6px;font-style:italic;}
+
+/* ══ C4 CODE ══ */
+.c4-interface{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;margin-bottom:16px;overflow:hidden;
+}
+.c4-interface-header{
+  background:var(--card);padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.c4-interface-icon{font-size:16px;}
+.c4-interface-name{font-size:13px;font-weight:700;}
+.c4-interface-pkg{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;}
+.c4-code{
+  padding:16px;font-family:var(--mono);font-size:11px;
+  line-height:1.9;overflow-x:auto;
+}
+.kw{color:var(--amber);}
+.cls{color:var(--blue);}
+.method{color:var(--green);}
+.param{color:var(--purple);}
+.ret{color:var(--teal);}
+.cmt{color:var(--muted);font-style:italic;}
+.ann{color:var(--oracle);}
+
+.c4-relations{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.c4-rel-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px;
+}
+.c4-rel-title{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:1px;margin-bottom:10px;}
+.c4-rel{
+  display:flex;align-items:center;gap:8px;
+  padding:5px 0;border-bottom:1px solid var(--dim);font-size:10px;
+}
+.c4-rel:last-child{border:none;}
+.c4-from{color:var(--amber);font-family:var(--mono);min-width:140px;font-size:9.5px;}
+.c4-arrow{color:var(--blue);font-weight:700;}
+.c4-to{color:var(--text);font-family:var(--mono);font-size:9.5px;}
+
+/* ══ E2E FLOW ══ */
+.flow-steps{display:flex;flex-direction:column;gap:0;}
+.flow-step{
+  display:flex;align-items:stretch;gap:0;
+  position:relative;
+}
+.flow-step-num{
+  width:36px;flex-shrink:0;display:flex;flex-direction:column;
+  align-items:center;
+}
+.flow-num-circle{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:700;z-index:2;
+}
+.flow-num-line{flex:1;width:2px;background:var(--border);margin:0 auto;}
+.flow-step:last-child .flow-num-line{display:none;}
+.flow-content{
+  flex:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;margin-left:12px;margin-bottom:8px;
+}
+.flow-content-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.flow-stage{font-size:11px;font-weight:700;}
+.flow-component{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.flow-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.flow-decision{
+  margin-top:6px;padding:5px 8px;border-radius:4px;
+  font-size:9.5px;font-family:var(--mono);display:inline-block;
+}
+
+/* ══ SEQUENCE ══ */
+.seq-wrap{overflow-x:auto;}
+.seq-actors{display:flex;gap:0;margin-bottom:0;}
+.seq-actor{
+  flex:1;text-align:center;padding:10px 6px;
+  border-radius:6px 6px 0 0;border:1px solid;border-bottom:none;
+  font-size:10px;font-weight:700;min-width:110px;
+}
+.seq-body{
+  border:1px solid var(--border);border-radius:0 0 8px 8px;
+  padding:8px;background:var(--surface);
+  overflow-x:auto;
+}
+.seq-row{
+  display:flex;align-items:center;
+  min-height:36px;border-bottom:1px solid var(--dim);
+  font-size:10px;font-family:var(--mono);
+  padding:4px 6px;gap:8px;
+}
+.seq-row:last-child{border:none;}
+.seq-from{min-width:120px;color:var(--amber);font-size:9.5px;}
+.seq-dir{color:var(--blue);font-weight:700;flex-shrink:0;font-size:13px;}
+.seq-to{min-width:120px;color:var(--green);font-size:9.5px;}
+.seq-msg{flex:1;color:var(--text);font-size:10px;}
+.seq-note{color:var(--muted);font-style:italic;font-size:9px;flex:1;}
+.seq-divider{
+  text-align:center;font-style:italic;color:var(--muted);
+  font-size:9.5px;padding:6px;background:var(--dim);border-radius:3px;margin:4px 0;
+}
+
+/* ══ DATA ARCH ══ */
+.data-center{
+  background:var(--oracleDim);border:2px solid var(--oracle);
+  border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;
+}
+.data-center-name{font-size:22px;font-weight:700;color:var(--oracle);margin-bottom:4px;}
+.data-center-sub{font-size:11px;color:var(--muted);}
+.data-capabilities{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.data-cap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px;
+  border-top:3px solid var(--oracle);
+}
+.data-cap-title{font-size:11px;font-weight:700;color:var(--oracle);margin-bottom:4px;}
+.data-cap-what{font-size:10px;color:var(--muted);margin-bottom:4px;line-height:1.5;}
+.data-cap-replaces{font-size:9px;font-family:var(--mono);color:var(--red);}
+.data-phase2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.data-p2{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px;
+  border-left:3px solid var(--blue);
+}
+.data-p2-title{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:4px;}
+.data-p2-desc{font-size:10px;color:var(--muted);line-height:1.5;}
+
+/* ══ SPEC FLOW ══ */
+.spec-pipeline{display:flex;align-items:stretch;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:16px;}
+.spec-step{
+  flex:1;padding:16px 12px;border-right:1px solid var(--border);
+  position:relative;
+}
+.spec-step:last-child{border-right:none;}
+.spec-step-num{font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:5px;letter-spacing:1px;}
+.spec-step-title{font-size:11px;font-weight:700;margin-bottom:4px;}
+.spec-step-desc{font-size:9.5px;color:var(--muted);line-height:1.5;}
+.spec-arrow{
+  position:absolute;right:-8px;top:50%;transform:translateY(-50%);
+  width:14px;height:14px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:700;color:#000;z-index:2;
+}
+.spec-types{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+.spec-type{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px;
+}
+.spec-type-name{font-size:11px;font-weight:700;margin-bottom:6px;}
+.spec-yaml{
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+  line-height:1.7;background:var(--bg);border-radius:4px;
+  padding:8px;margin-top:6px;white-space:pre;
+}
+.spec-generates{font-size:9px;color:var(--green);margin-top:6px;font-style:italic;}
+
+/* PRINT BUTTON */
+.print-bar{
+  position:fixed;bottom:20px;right:20px;
+  display:flex;gap:8px;z-index:200;
+}
+.print-btn{
+  background:var(--amber);color:#000;border:none;
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:1px;padding:10px 16px;border-radius:6px;
+  cursor:pointer;box-shadow:0 4px 16px rgba(245,158,11,0.4);
+}
+.print-btn:hover{background:var(--amber2);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">A</div>
+    <div class="nav-name">ACES DIAGRAMS</div>
+  </div>
+  <button class="nav-btn active" onclick="show('c1',this)">C1 Context</button>
+  <button class="nav-btn" onclick="show('c2',this)">C2 Container</button>
+  <button class="nav-btn" onclick="show('c3',this)">C3 Component</button>
+  <button class="nav-btn" onclick="show('c4',this)">C4 Code</button>
+  <button class="nav-btn" onclick="show('e2e',this)">E2E Flow</button>
+  <button class="nav-btn" onclick="show('seq',this)">Sequence</button>
+  <button class="nav-btn" onclick="show('data',this)">Data Arch</button>
+  <button class="nav-btn" onclick="show('spec',this)">Spec-Driven</button>
+</div>
+
+<!-- ══════════════════════════════════
+     C1 — CONTEXT DIAGRAM
+══════════════════════════════════ -->
+<div class="page active" id="pg-c1">
+  <div class="page-header">
+    <span class="page-tag tag-amber">C1 — SYSTEM CONTEXT</span>
+    <div class="page-title">ACES in the World</div>
+    <div class="page-sub">The highest-level view. ACES as a single system with all external actors and systems it interacts with. Who uses it. What it depends on.</div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">C1 · ACES SYSTEM CONTEXT DIAGRAM</div>
+    <div class="c1-wrap" style="height:640px;">
+      <svg class="c1-svg" id="c1svg"></svg>
+
+      <!-- CENTER: ACES -->
+      <div class="c1-center" id="c1-center" style="left:50%;top:50%;transform:translate(-50%,-50%);">
+        <div class="c1-center-name">ACES</div>
+        <div class="c1-center-full">AUTONOMOUS COGNITIVE ENGINEERING SYSTEM</div>
+        <div class="c1-center-desc">Spec-driven AI execution platform.<br/>Runs agents · Invokes tools · Orchestrates workflows.<br/>Governed by ARIA.</div>
+        <div style="margin-top:10px;font-family:var(--mono);font-size:8px;color:rgba(245,158,11,0.5);">Java 21 · Spring Boot 3 · Spring AI · Oracle 23ai</div>
+      </div>
+
+      <!-- USERS — top -->
+      <div class="c1-actor" id="a-engineers" style="left:6%;top:5%;">
+        <div class="c1-actor-icon">👩‍💻</div>
+        <div class="c1-actor-name" style="color:var(--amber)">Engineers</div>
+        <div class="c1-actor-desc">Write specs, run agents,<br/>monitor dashboards</div>
+        <span class="c1-actor-type" style="background:var(--amberDim);color:var(--amber)">PRIMARY USER</span>
+      </div>
+
+      <div class="c1-actor" id="a-mgmt" style="left:38%;top:2%;">
+        <div class="c1-actor-icon">👔</div>
+        <div class="c1-actor-name" style="color:var(--blue)">Management</div>
+        <div class="c1-actor-desc">Cost, risk, productivity<br/>dashboards</div>
+        <span class="c1-actor-type" style="background:var(--blueDim);color:var(--blue)">EXECUTIVE</span>
+      </div>
+
+      <div class="c1-actor" id="a-risk" style="right:6%;top:5%;">
+        <div class="c1-actor-icon">🛡</div>
+        <div class="c1-actor-name" style="color:var(--purple)">Risk / CISO</div>
+        <div class="c1-actor-desc">Audit trail, compliance,<br/>policy reports</div>
+        <span class="c1-actor-type" style="background:var(--purpleDim);color:var(--purple)">OVERSIGHT</span>
+      </div>
+
+      <div class="c1-actor" id="a-cicd" style="right:6%;top:38%;">
+        <div class="c1-actor-icon">⚙️</div>
+        <div class="c1-actor-name" style="color:var(--teal)">CI/CD</div>
+        <div class="c1-actor-desc">Trigger agent<br/>workflows via API</div>
+        <span class="c1-actor-type" style="background:var(--tealDim);color:var(--teal)">SYSTEM</span>
+      </div>
+
+      <!-- EXTERNAL SYSTEMS — bottom & sides -->
+      <div class="c1-actor" id="a-oracle" style="left:3%;bottom:8%;">
+        <div class="c1-actor-icon">🔴</div>
+        <div class="c1-actor-name" style="color:var(--oracle)">Oracle 23ai</div>
+        <div class="c1-actor-desc">Private cloud DB.<br/>All persistent data.</div>
+        <span class="c1-actor-type" style="background:var(--oracleDim);color:var(--oracle)">PRIMARY STORE</span>
+      </div>
+
+      <div class="c1-actor" id="a-aria" style="left:30%;bottom:3%;">
+        <div class="c1-actor-icon">⬡</div>
+        <div class="c1-actor-name" style="color:var(--blue)">ARIA</div>
+        <div class="c1-actor-desc">Governance layer.<br/>Trust · Risk · Audit.</div>
+        <span class="c1-actor-type" style="background:var(--blueDim);color:var(--blue)">GOVERNANCE</span>
+      </div>
+
+      <div class="c1-actor" id="a-llm" style="right:28%;bottom:3%;">
+        <div class="c1-actor-icon">🤖</div>
+        <div class="c1-actor-name" style="color:var(--green)">LLM Providers</div>
+        <div class="c1-actor-desc">OpenAI · Anthropic<br/>Azure OpenAI</div>
+        <span class="c1-actor-type" style="background:var(--greenDim);color:var(--green)">AI PROVIDERS</span>
+      </div>
+
+      <div class="c1-actor" id="a-enterprise" style="right:3%;bottom:8%;">
+        <div class="c1-actor-icon">🏢</div>
+        <div class="c1-actor-name" style="color:var(--muted)">Enterprise Systems</div>
+        <div class="c1-actor-desc">JIRA · Slack · GitHub<br/>Confluence</div>
+        <span class="c1-actor-type" style="background:var(--dim);color:var(--muted)">INTEGRATIONS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interaction table -->
+  <div class="diag-wrap">
+    <div class="diag-title">C1 · INTERACTION SUMMARY</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <thead>
+        <tr style="background:var(--surface);">
+          <th style="padding:10px 12px;text-align:left;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);">ACTOR / SYSTEM</th>
+          <th style="padding:10px 12px;text-align:left;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);">DIRECTION</th>
+          <th style="padding:10px 12px;text-align:left;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);">PROTOCOL</th>
+          <th style="padding:10px 12px;text-align:left;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);">WHAT IS EXCHANGED</th>
+        </tr>
+      </thead>
+      <tbody id="c1-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     C2 — CONTAINER DIAGRAM
+══════════════════════════════════ -->
+<div class="page" id="pg-c2">
+  <div class="page-header">
+    <span class="page-tag tag-amber">C2 — CONTAINER DIAGRAM</span>
+    <div class="page-title">ACES Internal Containers</div>
+    <div class="page-sub">Zooms inside ACES showing the major deployable Spring Boot modules. Phase 1 is a modular monolith — one JAR, strong internal boundaries. Phase 3 may extract to microservices.</div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">C2 · ACES MODULAR MONOLITH — SPRING BOOT MULTI-MODULE</div>
+
+    <!-- Users -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:18px;margin-bottom:4px;">👩‍💻</div>
+        <div style="font-size:10px;font-weight:700;">Engineers</div>
+        <div style="font-size:8.5px;color:var(--muted);">REST / UI / CLI</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:18px;margin-bottom:4px;">👔</div>
+        <div style="font-size:10px;font-weight:700;">Management</div>
+        <div style="font-size:8.5px;color:var(--muted);">Dashboard</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:18px;margin-bottom:4px;">⚙️</div>
+        <div style="font-size:10px;font-weight:700;">CI/CD</div>
+        <div style="font-size:8.5px;color:var(--muted);">Webhooks</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:var(--amber);font-size:18px;margin-bottom:8px;">↓ HTTPS / REST</div>
+
+    <!-- ACES boundary -->
+    <div class="c2-outer">
+      <div class="c2-outer-label">ACES PLATFORM — Spring Boot 3.3 · Java 21 · Private Cloud JAR</div>
+
+      <!-- API layer -->
+      <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:12px;margin-bottom:10px;text-align:center;">
+        <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:4px;">aces-api</div>
+        <div style="font-size:10px;color:var(--muted);">Spring MVC REST layer · OAuth2 JWT validation · Request routing · Response formatting</div>
+      </div>
+
+      <div style="text-align:center;color:var(--muted);font-size:10px;margin-bottom:8px;font-family:var(--mono);">↕ internal method calls</div>
+
+      <!-- Core modules grid -->
+      <div class="c2-grid" style="margin-bottom:10px;">
+        <div class="c2-box" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.04);">
+          <div class="c2-box-name" style="color:var(--amber);">aces-core</div>
+          <div class="c2-box-tech">Spring AI · Java 21 Virtual Threads</div>
+          <div class="c2-box-desc">Agentic orchestration loop. Planner → Orchestrator → Retriever → Synthesizer → Critic. Memory service.</div>
+        </div>
+        <div class="c2-box" style="border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.04);">
+          <div class="c2-box-name" style="color:var(--red);">aces-mcp</div>
+          <div class="c2-box-tech">Resilience4j · Spring Security</div>
+          <div class="c2-box-desc">MCP control pipeline. Auth · Policy · Rate Limit · Circuit Breaker · Tool Execution · Audit Logger.</div>
+        </div>
+        <div class="c2-box" style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.04);">
+          <div class="c2-box-name" style="color:var(--green);">aces-runtime</div>
+          <div class="c2-box-tech">Plugin contract · Spring AI adapters</div>
+          <div class="c2-box-desc">Agent plugin registry. Execution router. ARIA context injector. Agent adapters: Copilot, Claude, custom.</div>
+        </div>
+        <div class="c2-box" style="border-color:rgba(56,189,248,0.3);background:rgba(56,189,248,0.04);">
+          <div class="c2-box-name" style="color:var(--blue);">aces-governance</div>
+          <div class="c2-box-tech">Spring RestClient · Oracle AQ</div>
+          <div class="c2-box-desc">ARIA REST client. Sends execution records async via Oracle AQ. Receives governance decisions.</div>
+        </div>
+        <div class="c2-box" style="border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.04);">
+          <span class="c2-badge" style="background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.3);">P2</span>
+          <div class="c2-box-name" style="color:var(--purple);">aces-spec-engine</div>
+          <div class="c2-box-tech">SnakeYAML · JSON Schema</div>
+          <div class="c2-box-desc">YAML spec parser → IR converter → DAG planner. Phase 2 capability.</div>
+        </div>
+        <div class="c2-box" style="border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.04);">
+          <span class="c2-badge" style="background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.3);">P2</span>
+          <div class="c2-box-name" style="color:var(--purple);">aces-generator</div>
+          <div class="c2-box-tech">Freemarker · Spring AI</div>
+          <div class="c2-box-desc">Template + LLM code generation. Produces Spring Boot services from IR.</div>
+        </div>
+      </div>
+
+      <!-- Cross-cutting -->
+      <div style="background:rgba(45,212,191,0.04);border:1px solid rgba(45,212,191,0.2);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:4px;">aces-observability + aces-common</div>
+        <div style="font-size:10px;color:var(--muted);">OpenTelemetry spans · Micrometer metrics · Spring Actuator · Shared models (IR, DTOs, plugin contracts) · One trace ID across all modules</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:var(--muted);font-size:10px;margin-bottom:8px;font-family:var(--mono);">↕ Oracle JDBC (direct · private cloud · no wallet)</div>
+
+    <!-- External systems -->
+    <div class="c2-ext">
+      <div class="c2-ext-box" style="border-color:var(--oracle);background:var(--oracleDim);">
+        <div class="c2-ext-icon">🔴</div>
+        <div class="c2-ext-name" style="color:var(--oracle);">Oracle 23ai</div>
+        <div class="c2-ext-desc">Private cloud · JDBC direct · VPD · Vector · Text · AQ</div>
+      </div>
+      <div class="c2-ext-box">
+        <div class="c2-ext-icon">⬡</div>
+        <div class="c2-ext-name" style="color:var(--blue);">ARIA</div>
+        <div class="c2-ext-desc">Governance REST API · Trust decisions</div>
+      </div>
+      <div class="c2-ext-box">
+        <div class="c2-ext-icon">🤖</div>
+        <div class="c2-ext-name" style="color:var(--green);">LLM Providers</div>
+        <div class="c2-ext-desc">OpenAI · Anthropic · Azure</div>
+      </div>
+      <div class="c2-ext-box">
+        <div class="c2-ext-icon">🔔</div>
+        <div class="c2-ext-name">Slack / JIRA</div>
+        <div class="c2-ext-desc">Notifications · Approval tickets</div>
+      </div>
+      <div class="c2-ext-box">
+        <div class="c2-ext-icon">☁️</div>
+        <div class="c2-ext-name">Private Cloud</div>
+        <div class="c2-ext-desc">Platform team deploys JAR. Your team produces it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     C3 — COMPONENT DIAGRAM
+══════════════════════════════════ -->
+<div class="page" id="pg-c3">
+  <div class="page-header">
+    <span class="page-tag tag-green">C3 — COMPONENT DIAGRAM</span>
+    <div class="page-title">Inside Each Container</div>
+    <div class="page-sub">Spring beans and services inside each ACES module. This is what engineers implement. Each box is a @Service, @Component, or @Configuration class.</div>
+  </div>
+
+  <!-- aces-core -->
+  <div class="c3-module" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.02);">
+    <div class="c3-module-header">
+      <div class="c3-module-icon">🧠</div>
+      <div>
+        <div class="c3-module-name" style="color:var(--amber);">aces-core — Agentic Orchestration</div>
+        <div class="c3-module-sub">com.jpmc.aces.core · Spring AI · Java 21 virtual threads</div>
+      </div>
+    </div>
+    <div class="c3-components" id="c3-core"></div>
+  </div>
+
+  <!-- aces-mcp -->
+  <div class="c3-module" style="border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.02);">
+    <div class="c3-module-header">
+      <div class="c3-module-icon">🚦</div>
+      <div>
+        <div class="c3-module-name" style="color:var(--red);">aces-mcp — MCP Control Pipeline</div>
+        <div class="c3-module-sub">com.jpmc.aces.mcp · Resilience4j · Spring Security · Oracle 23ai</div>
+      </div>
+    </div>
+    <div class="c3-components" id="c3-mcp"></div>
+  </div>
+
+  <!-- aces-runtime -->
+  <div class="c3-module" style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.02);">
+    <div class="c3-module-header">
+      <div class="c3-module-icon">⚡</div>
+      <div>
+        <div class="c3-module-name" style="color:var(--green);">aces-runtime — Agent Runtime</div>
+        <div class="c3-module-sub">com.jpmc.aces.runtime · AgentPlugin interface · Spring AI adapters</div>
+      </div>
+    </div>
+    <div class="c3-components" id="c3-runtime"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     C4 — CODE DIAGRAM
+══════════════════════════════════ -->
+<div class="page" id="pg-c4">
+  <div class="page-header">
+    <span class="page-tag tag-purple">C4 — CODE DIAGRAM</span>
+    <div class="page-title">Key Classes & Interfaces</div>
+    <div class="page-sub">The plugin contract and core domain models. These are the stable interfaces every engineer must understand. Changing these after Phase 1 requires a version bump.</div>
+  </div>
+
+  <!-- AgentPlugin interface -->
+  <div class="c4-interface">
+    <div class="c4-interface-header">
+      <div class="c4-interface-icon">🔌</div>
+      <div class="c4-interface-name">AgentPlugin Interface — THE Core Contract</div>
+      <div class="c4-interface-pkg">com.jpmc.aces.common.plugin.contract</div>
+    </div>
+    <div class="c4-code">
+<span class="cmt">// Every AI agent that runs on ACES must implement this interface.</span>
+<span class="cmt">// Versioned. Stable after Phase 1. Do not change without a version bump.</span>
+<span class="kw">public interface</span> <span class="cls">AgentPlugin</span> {
+
+  <span class="cmt">// Required: plugin identity — declared in plugin.json</span>
+  <span class="ret">PluginManifest</span>    <span class="method">getManifest</span>();
+
+  <span class="cmt">// Required: health check — called every 60s by PluginHealthMonitor</span>
+  <span class="ret">HealthStatus</span>      <span class="method">ping</span>();
+
+  <span class="cmt">// Required: execute a task — agentReasoning in response is MANDATORY</span>
+  <span class="ret">AgentResponse</span>     <span class="method">execute</span>(<span class="param">AgentRequest</span> request);
+
+  <span class="cmt">// Required: return execution metadata for audit</span>
+  <span class="ret">ExecutionMetadata</span> <span class="method">getExecutionMetadata</span>(<span class="param">String</span> executionId);
+
+  <span class="cmt">// Optional: cancel in-flight execution</span>
+  <span class="kw">default void</span>      <span class="method">cancel</span>(<span class="param">String</span> executionId) {}
+
+  <span class="cmt">// Optional: estimate cost before execution</span>
+  <span class="kw">default</span> <span class="ret">CostEstimate</span> <span class="method">estimateCost</span>(<span class="param">AgentRequest</span> req) { <span class="kw">return null</span>; }
+}</div>
+  </div>
+
+  <!-- Key Records -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+    <div class="c4-interface">
+      <div class="c4-interface-header">
+        <div class="c4-interface-icon">📥</div>
+        <div class="c4-interface-name">AgentRequest</div>
+        <div class="c4-interface-pkg">aces-common · IR model</div>
+      </div>
+      <div class="c4-code" style="font-size:10px;">
+<span class="kw">public record</span> <span class="cls">AgentRequest</span>(
+  <span class="ret">String</span>               executionId,
+  <span class="ret">String</span>               taskType,
+  <span class="ret">AgentContext</span>         context,
+  <span class="ret">ExecutionConstraints</span> constraints,
+  <span class="ret">AriaContext</span>          ariaContext  <span class="cmt">// MANDATORY — injected by ARIA</span>
+) {}
+
+<span class="kw">public record</span> <span class="cls">AriaContext</span>(
+  <span class="ret">double</span>       trustScore,
+  <span class="ret">String</span>       trustBand,
+  <span class="ret">List&lt;String&gt;</span> activeConstraints, <span class="cmt">// agent MUST respect these</span>
+  <span class="ret">String</span>       priorDecision
+) {}</div>
+    </div>
+    <div class="c4-interface">
+      <div class="c4-interface-header">
+        <div class="c4-interface-icon">📤</div>
+        <div class="c4-interface-name">AgentResponse</div>
+        <div class="c4-interface-pkg">aces-common · IR model</div>
+      </div>
+      <div class="c4-code" style="font-size:10px;">
+<span class="kw">public record</span> <span class="cls">AgentResponse</span>(
+  <span class="ret">String</span>          executionId,
+  <span class="ret">ExecutionStatus</span> status,
+  <span class="ret">List&lt;Artifact&gt;</span>  artifacts,
+  <span class="ret">int</span>             tokenCount,
+  <span class="ret">long</span>            durationMs,
+  <span class="ret">String</span>          agentReasoning, <span class="cmt">// NEVER null, NEVER empty</span>
+  <span class="ret">Double</span>          confidence
+) {}
+
+<span class="cmt">// agentReasoning feeds Decision Archaeology in ARIA.</span>
+<span class="cmt">// If empty → validation fails → PR blocked.</span></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+    <div class="c4-interface">
+      <div class="c4-interface-header">
+        <div class="c4-interface-icon">🧬</div>
+        <div class="c4-interface-name">SystemIR — Intermediate Representation</div>
+        <div class="c4-interface-pkg">aces-spec-engine (Phase 2)</div>
+      </div>
+      <div class="c4-code" style="font-size:10px;">
+<span class="cmt">// Produced from YAML spec. Strictly typed. No ambiguity.</span>
+<span class="kw">public record</span> <span class="cls">SystemIR</span>(
+  <span class="ret">IRMetadata</span>      metadata,
+  <span class="ret">List&lt;ServiceNode&gt;</span> services,
+  <span class="ret">List&lt;AgentNode&gt;</span>  agents,
+  <span class="ret">ArchitectureNode</span> architecture,
+  <span class="ret">PolicySet</span>        policies,
+  <span class="ret">List&lt;TaskNode&gt;</span>   taskGraph  <span class="cmt">// set by DAGPlanner</span>
+) {}
+
+<span class="kw">public record</span> <span class="cls">TaskNode</span>(
+  <span class="ret">String</span>              id,
+  <span class="ret">TaskType</span>            type,
+  <span class="ret">List&lt;String&gt;</span>        dependencies,
+  <span class="ret">Map&lt;String,Object&gt;</span> payload,
+  <span class="ret">TaskStatus</span>          status
+) {}</div>
+    </div>
+    <div class="c4-interface">
+      <div class="c4-interface-header">
+        <div class="c4-interface-icon">📋</div>
+        <div class="c4-interface-name">PluginManifest — Registration Schema</div>
+        <div class="c4-interface-pkg">aces-common · plugin contract</div>
+      </div>
+      <div class="c4-code" style="font-size:10px;">
+<span class="kw">public record</span> <span class="cls">PluginManifest</span>(
+  <span class="ret">String</span>         pluginId,      <span class="cmt">// globally unique, kebab-case</span>
+  <span class="ret">String</span>         displayName,
+  <span class="ret">String</span>         version,       <span class="cmt">// semver — 1.0.0</span>
+  <span class="ret">PluginLayer</span>    layer,         <span class="cmt">// EXECUTION, GOVERNANCE...</span>
+  <span class="ret">String</span>         type,          <span class="cmt">// agent, mcp-server, tool...</span>
+  <span class="ret">List&lt;String&gt;</span>   capabilities,
+  <span class="ret">boolean</span>        trustable,     <span class="cmt">// true only for agents</span>
+  <span class="ret">CostModel</span>      costModel,
+  <span class="ret">HealthCheck</span>    healthCheck
+) {}</div>
+    </div>
+  </div>
+
+  <!-- Class relationships -->
+  <div class="c4-relations">
+    <div class="c4-rel-box">
+      <div class="c4-rel-title">KEY RELATIONSHIPS</div>
+      <div class="c4-rel"><span class="c4-from">AgentExecutionService</span><span class="c4-arrow">uses →</span><span class="c4-to">AgentExecutionRouter</span></div>
+      <div class="c4-rel"><span class="c4-from">AgentExecutionService</span><span class="c4-arrow">uses →</span><span class="c4-to">ARIAContextInjector</span></div>
+      <div class="c4-rel"><span class="c4-from">AgentExecutionService</span><span class="c4-arrow">uses →</span><span class="c4-to">ARIAReporter</span></div>
+      <div class="c4-rel"><span class="c4-from">ClaudeAgentAdapter</span><span class="c4-arrow">implements →</span><span class="c4-to">AgentPlugin</span></div>
+      <div class="c4-rel"><span class="c4-from">CopilotAgentAdapter</span><span class="c4-arrow">implements →</span><span class="c4-to">AgentPlugin</span></div>
+      <div class="c4-rel"><span class="c4-from">ToolExecutionEngine</span><span class="c4-arrow">uses →</span><span class="c4-to">PolicyEvaluationService</span></div>
+      <div class="c4-rel"><span class="c4-from">ToolExecutionEngine</span><span class="c4-arrow">uses →</span><span class="c4-to">RateLimiterService</span></div>
+      <div class="c4-rel"><span class="c4-from">ToolExecutionEngine</span><span class="c4-arrow">uses →</span><span class="c4-to">CircuitBreakerRegistry</span></div>
+      <div class="c4-rel"><span class="c4-from">ToolExecutionEngine</span><span class="c4-arrow">uses →</span><span class="c4-to">AuditLogger</span></div>
+      <div class="c4-rel"><span class="c4-from">OrchestratorService</span><span class="c4-arrow">uses →</span><span class="c4-to">RetrieverService</span></div>
+      <div class="c4-rel"><span class="c4-from">OrchestratorService</span><span class="c4-arrow">uses →</span><span class="c4-to">SynthesizerService</span></div>
+      <div class="c4-rel"><span class="c4-from">OrchestratorService</span><span class="c4-arrow">uses →</span><span class="c4-to">CriticService</span></div>
+    </div>
+    <div class="c4-rel-box">
+      <div class="c4-rel-title">ORACLE 23AI INTEGRATIONS</div>
+      <div class="c4-rel"><span class="c4-from">MemoryService</span><span class="c4-arrow">writes →</span><span class="c4-to">Oracle Vector Search (LTM)</span></div>
+      <div class="c4-rel"><span class="c4-from">AuditLogger</span><span class="c4-arrow">appends →</span><span class="c4-to">ACES_AUDIT_LOG (append-only)</span></div>
+      <div class="c4-rel"><span class="c4-from">ToolRegistry</span><span class="c4-arrow">reads/writes →</span><span class="c4-to">ACES_TOOL_REGISTRY</span></div>
+      <div class="c4-rel"><span class="c4-from">ARIAReporter</span><span class="c4-arrow">publishes →</span><span class="c4-to">Oracle AQ → ARIA</span></div>
+      <div class="c4-rel"><span class="c4-from">PolicyEvaluationService</span><span class="c4-arrow">reads →</span><span class="c4-to">ACES_POLICY_RULES</span></div>
+      <div class="c4-rel"><span class="c4-from">AgentPluginRegistry</span><span class="c4-arrow">reads/writes →</span><span class="c4-to">ACES_PLUGINS</span></div>
+      <div class="c4-rel"><span class="c4-from">TenantGuardInterceptor</span><span class="c4-arrow">sets →</span><span class="c4-to">Oracle VPD context (ACES_CTX)</span></div>
+      <div class="c4-rel"><span class="c4-from">RateLimiterService</span><span class="c4-arrow">reads →</span><span class="c4-to">ACES_TOOL_REGISTRY.rate_limit</span></div>
+      <div class="c4-rel"><span class="c4-from">SpecToIRConverter (P2)</span><span class="c4-arrow">produces →</span><span class="c4-to">SystemIR (in memory)</span></div>
+      <div class="c4-rel"><span class="c4-from">DAGPlanner (P2)</span><span class="c4-arrow">writes →</span><span class="c4-to">ACES_TASKS (DAG nodes)</span></div>
+      <div class="c4-rel"><span class="c4-from">CodeGenerator (P2)</span><span class="c4-arrow">reads →</span><span class="c4-to">SystemIR → Freemarker templates</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     E2E FLOW
+══════════════════════════════════ -->
+<div class="page" id="pg-e2e">
+  <div class="page-header">
+    <span class="page-tag tag-teal">END-TO-END FLOW</span>
+    <div class="page-title">Complete Request Lifecycle</div>
+    <div class="page-sub">From engineer submitting a request to ARIA updating the agent trust score. Every step, every component, every decision point.</div>
+  </div>
+  <div class="diag-wrap">
+    <div class="diag-title">E2E · ACES REQUEST LIFECYCLE — 20 STEPS</div>
+    <div class="flow-steps" id="e2e-steps"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEQUENCE DIAGRAMS
+══════════════════════════════════ -->
+<div class="page" id="pg-seq">
+  <div class="page-header">
+    <span class="page-tag tag-green">SEQUENCE DIAGRAMS</span>
+    <div class="page-title">Three Critical Paths</div>
+    <div class="page-sub">Happy path (ALLOW), BLOCK path, and REQUIRES_APPROVAL path. Every interaction between components shown in sequence.</div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">SEQ 1 · HAPPY PATH — AGENT EXECUTES SUCCESSFULLY</div>
+    <div class="seq-wrap" id="seq1"></div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">SEQ 2 · BLOCK PATH — ARIA BLOCKS HIGH-RISK AGENT</div>
+    <div class="seq-wrap" id="seq2"></div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">SEQ 3 · REQUIRES_APPROVAL PATH — HUMAN GATE</div>
+    <div class="seq-wrap" id="seq3"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     DATA ARCHITECTURE
+══════════════════════════════════ -->
+<div class="page" id="pg-data">
+  <div class="page-header">
+    <span class="page-tag tag-oracle">DATA ARCHITECTURE</span>
+    <div class="page-title">Oracle 23ai — Complete Data Platform</div>
+    <div class="page-sub">Oracle 23ai on private cloud replaces five separate services. One connection, one security model, one ops team. Every capability is built-in.</div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">DATA · ORACLE 23AI CAPABILITY MAP</div>
+    <div class="data-center">
+      <div class="data-center-name">Oracle 23ai</div>
+      <div class="data-center-sub">Private Cloud · Direct JDBC · One connection string · Your DBA team manages it</div>
+    </div>
+    <div class="data-capabilities" id="data-caps"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:10px;">ADDITIONAL TOOLS — ADDED ONLY WHEN ORACLE CANNOT MEET THE REQUIREMENT</div>
+    <div class="data-phase2" id="data-phase2"></div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">DATA · ORACLE SCHEMA — KEY TABLES</div>
+    <table style="width:100%;border-collapse:collapse;font-size:10.5px;">
+      <thead><tr style="background:var(--surface);">
+        <th style="padding:9px 12px;text-align:left;color:var(--oracle);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);">TABLE</th>
+        <th style="padding:9px 12px;text-align:left;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);">MODULE</th>
+        <th style="padding:9px 12px;text-align:left;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);">KEY COLUMNS</th>
+      </tr></thead>
+      <tbody id="schema-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SPEC-DRIVEN FLOW
+══════════════════════════════════ -->
+<div class="page" id="pg-spec">
+  <div class="page-header">
+    <span class="page-tag tag-purple">SPEC-DRIVEN DEVELOPMENT</span>
+    <div class="page-title">YAML Spec → Running System</div>
+    <div class="page-sub">Phase 2 capability. How engineers describe what they want, and ACES builds and runs it. The pipeline that makes ACES a compiler for systems.</div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">SPEC · 7-STAGE PIPELINE — YAML TO RUNNING SYSTEM</div>
+    <div class="spec-pipeline" id="spec-pipeline"></div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">SPEC · FIVE SPEC TYPES — WHAT ENGINEERS WRITE</div>
+    <div class="spec-types" id="spec-types"></div>
+  </div>
+
+  <div class="diag-wrap">
+    <div class="diag-title">SPEC · TEMPLATE + LLM HYBRID — WHY PURE LLM FAILS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+      <div style="background:var(--greenDim);border:1px solid rgba(52,211,153,0.3);border-radius:8px;padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:10px;">TEMPLATE PROVIDES (Deterministic)</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.8;">
+          • Package: com.jpmc.aces.{module}<br/>
+          • Class hierarchy + Spring annotations<br/>
+          • @Service, @Repository, @Controller<br/>
+          • Constructor injection pattern<br/>
+          • Oracle JPA entity structure<br/>
+          • Error handling skeleton<br/>
+          • Test class (JUnit 5)<br/>
+          • Logging (SLF4J)<br/>
+          • OpenTelemetry span wrapping
+        </div>
+      </div>
+      <div style="background:var(--amberDim);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:10px;">LLM FILLS IN (Intelligent)</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.8;">
+          • Business logic in service methods<br/>
+          • Domain-specific validation rules<br/>
+          • Oracle SQL for this service<br/>
+          • Vector Search embedding logic<br/>
+          • Agent prompt templates<br/>
+          • Tool integration specifics<br/>
+          • Domain error messages<br/>
+          • Business exception types<br/>
+          • Domain test scenarios
+        </div>
+      </div>
+      <div style="background:var(--blueDim);border:1px solid rgba(56,189,248,0.3);border-radius:8px;padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:10px;">OUTPUT (Consistent + Smart)</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.8;">
+          • Complete Spring Boot service<br/>
+          • Consistent arch across all modules<br/>
+          • Oracle 23ai integration working<br/>
+          • Tests that actually pass<br/>
+          • ARIA governance hooks wired<br/>
+          • Audit logging configured<br/>
+          • OTel traces instrumented<br/>
+          • 100% buildable: mvn install<br/>
+          • Review-ready for engineers
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="print-bar">
+  <button class="print-btn" onclick="window.print()">⊞ PRINT / PDF</button>
+</div>
+
+<script>
+// ── NAV ──
+function show(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── C1 SVG CONNECTOR LINES ──
+function drawC1Lines() {
+  const svg = document.getElementById('c1svg');
+  const wrap = svg.parentElement;
+  const ww = wrap.offsetWidth, wh = wrap.offsetHeight;
+  svg.setAttribute('viewBox',`0 0 ${ww} ${wh}`);
+
+  const center = document.getElementById('c1-center');
+  const cx = center.offsetLeft + center.offsetWidth/2;
+  const cy = center.offsetTop + center.offsetHeight/2;
+
+  const actors = [
+    {id:'a-engineers', color:'#f59e0b', label:'uses · REST API'},
+    {id:'a-mgmt',      color:'#38bdf8', label:'reads · Dashboard'},
+    {id:'a-risk',      color:'#a78bfa', label:'reads · Compliance'},
+    {id:'a-cicd',      color:'#2dd4bf', label:'calls · Webhook'},
+    {id:'a-oracle',    color:'#fb923c', label:'reads/writes · JDBC'},
+    {id:'a-aria',      color:'#38bdf8', label:'sends/receives · REST'},
+    {id:'a-llm',       color:'#34d399', label:'calls · HTTPS'},
+    {id:'a-enterprise',color:'#6b7280', label:'notifies · REST'},
+  ];
+
+  let lines = '';
+  actors.forEach(({id,color,label})=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const ex = el.offsetLeft + el.offsetWidth/2;
+    const ey = el.offsetTop + el.offsetHeight/2;
+    lines += `<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="${color}" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.5"/>`;
+    const mx = (cx+ex)/2, my = (cy+ey)/2;
+    lines += `<text x="${mx}" y="${my}" fill="${color}" font-size="8" font-family="JetBrains Mono" text-anchor="middle" opacity="0.7">${label}</text>`;
+  });
+  svg.innerHTML = lines;
+}
+
+// ── C1 TABLE ──
+const c1rows = [
+  ['Engineers','→ ACES','REST API / CLI / Web UI','YAML specs, agent commands, tool calls, dashboard queries'],
+  ['Senior Management','← ACES','Web Dashboard','Cost, trust scores, risk summaries, incident attribution'],
+  ['Risk / CISO','← ACES','Dashboard + PDF Export','Audit trails, policy reports, compliance exports'],
+  ['CI/CD Systems','→ ACES','REST / Webhook','Trigger agent workflows, receive execution results'],
+  ['Oracle 23ai (private cloud)','← ACES →','JDBC · Spring Data JPA','All persistent data: agents, specs, executions, audit, vectors, AQ messages'],
+  ['ARIA (Governance)','← ACES →','Internal REST · Oracle AQ','Execution records to ARIA; trust decisions from ARIA'],
+  ['LLM Providers (OpenAI/Anthropic/Azure)','← ACES →','HTTPS · Spring AI SDK','Prompts + context sent; token responses returned'],
+  ['JIRA / Confluence','← ACES','REST / Webhook','Approval tickets, spec docs, incident links'],
+  ['Slack','← ACES','REST / Bot API','Decision notifications, approval requests, block alerts'],
+  ['GitHub','→ ACES','Webhook','PR events trigger agent workflows'],
+  ['Private Cloud (JPMC)','← ACES','Spring Boot JAR','ACES deployed as JARs; cloud team manages infra'],
+];
+const tbody = document.getElementById('c1-table');
+c1rows.forEach(([actor,dir,proto,what],i)=>{
+  tbody.innerHTML += `<tr style="background:${i%2===0?'var(--surface)':'var(--bg)'}">
+    <td style="padding:9px 12px;font-weight:600;font-size:11px;">${actor}</td>
+    <td style="padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--amber);font-weight:700;">${dir}</td>
+    <td style="padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--blue);">${proto}</td>
+    <td style="padding:9px 12px;font-size:10px;color:var(--muted);">${what}</td>
+  </tr>`;
+});
+
+// ── C3 COMPONENTS ──
+const c3core = [
+  {name:'PlannerService',type:'@Service',desc:'Receives request/IR. Emits structured retrieval plan as JSON. Decomposes goal into subtasks.',collab:'OrchestratorService, SpecEngine(P2)',color:'var(--amber)'},
+  {name:'OrchestratorService',type:'@Service',desc:'Drives the one-revise agentic loop. Coordinates Retriever → Synthesizer → Critic cycle. Hard stop after 1 revision.',collab:'RetrieverService, SynthesizerService, CriticService',color:'var(--amber)'},
+  {name:'RetrieverService',type:'@Service',desc:'Bounded tool loop (max 6 iterations). Calls tools via MCP pipeline. Collects findings.',collab:'AcesMcpDispatcher, MemoryService',color:'var(--amber)'},
+  {name:'SynthesizerService',type:'@Service',desc:'Drafts response with citations using Spring AI ChatClient. Structured output.',collab:'Spring AI ChatClient, MemoryService',color:'var(--amber)'},
+  {name:'CriticService',type:'@Service',desc:'Evaluates synthesizer draft. Returns APPROVE or REVISE. Hard stop after 1 revision cycle.',collab:'Spring AI ChatClient, ARIAReporter',color:'var(--amber)'},
+  {name:'MemoryService',type:'@Service',desc:'STM: Oracle session cache. LTM: Oracle AI Vector Search (embeddings). Tenant-scoped.',collab:'Oracle 23ai Vector Search, Spring Cache',color:'var(--amber)'},
+  {name:'AgentContextHolder',type:'@Component',desc:'Thread-local holder for agent ID, tenant ID, trace ID, ARIA trust context.',collab:'All core services',color:'var(--amber)'},
+  {name:'AcesCoreConfig',type:'@Configuration',desc:'Spring AI ChatClient beans. Model routing. LLM provider selection per agent type.',collab:'Spring AI, application.yml',color:'var(--amber)'},
+];
+const c3mcp = [
+  {name:'JwtAuthFilter',type:'OncePerRequestFilter',desc:'Validates OAuth2.1 JWT on every inbound call. Extracts tenant, roles, agent ID.',collab:'Spring Security, JWKS endpoint',color:'var(--red)'},
+  {name:'TenantGuardInterceptor',type:'HandlerInterceptor',desc:'Sets Oracle VPD context (ACES_CTX.TENANT_ID). Rejects cross-tenant requests.',collab:'Oracle VPD, TenantContextHolder',color:'var(--red)'},
+  {name:'PolicyEvaluationService',type:'@Service',desc:'Evaluates YAML deny-by-default rules per tool call. Returns ALLOW or DENY with reason.',collab:'PolicyRepository (Oracle)',color:'var(--red)'},
+  {name:'ValidationFilter',type:'@Component',desc:'Validates request payload against tool JSON schema. Rejects malformed inputs early.',collab:'ToolRegistry, JSON Schema validator',color:'var(--red)'},
+  {name:'RateLimiterService',type:'@Service',desc:'Token bucket per tenant per tool. Spring Cache (P1). Redis (P2 when throughput demands).',collab:'Spring Cache, Oracle tool rate limits',color:'var(--red)'},
+  {name:'CircuitBreakerRegistry',type:'@Bean',desc:'Resilience4j circuit breaker per downstream tool. Closed → Half-open → Open.',collab:'Resilience4j, ToolRegistry',color:'var(--red)'},
+  {name:'RetryPolicy',type:'@Bean',desc:'Jitter backoff + Turn Budget Allocator (ATBA). Prevents infinite retry loops.',collab:'Resilience4j, ATBA counter',color:'var(--red)'},
+  {name:'ToolExecutionEngine',type:'@Service',desc:'Orchestrates atomic/composed tool calls through full MCP pipeline. Core dispatcher.',collab:'All MCP components, AuditLogger',color:'var(--red)'},
+  {name:'AuditLogger',type:'@Service',desc:'Logs every tool call to Oracle ACES_AUDIT_LOG: timestamp, tenant, tool, payload hash, result hash, duration.',collab:'Oracle 23ai (append-only)',color:'var(--red)'},
+  {name:'ToolRegistry',type:'@Repository',desc:'Versioned tool catalog in Oracle. Semver validation. Schema lookup per tool.',collab:'Oracle ACES_TOOL_REGISTRY',color:'var(--red)'},
+  {name:'NxLockManager',type:'@Service',desc:'Spring Cache distributed lock. Prevents thundering herd on concurrent tool calls.',collab:'Spring Cache (P1), Redis (P2)',color:'var(--red)'},
+  {name:'CacheManager',type:'@Bean',desc:'L1 in-process ConcurrentHashMap. L2 Oracle Result Cache. Hit rate metrics via Micrometer.',collab:'Spring @Cacheable, Oracle',color:'var(--red)'},
+];
+const c3runtime = [
+  {name:'AgentPluginRegistry',type:'@Component',desc:'Map of registered agent plugins. Auto-discovers on startup. Refreshes every 60s.',collab:'Oracle ACES_PLUGINS, PluginManifest',color:'var(--green)'},
+  {name:'AgentExecutionRouter',type:'@Service',desc:'Routes execution request to correct agent plugin based on agentId. Validates ACTIVE status.',collab:'AgentPluginRegistry',color:'var(--green)'},
+  {name:'ARIAContextInjector',type:'@Component',desc:'Calls ARIA before every execution. Injects trust score and activeConstraints into AgentRequest.',collab:'ARIAClient, AgentContextHolder',color:'var(--green)'},
+  {name:'AgentExecutionService',type:'@Service',desc:'Full execution lifecycle: validate → inject ARIA context → execute → collect → report to ARIA.',collab:'AgentExecutionRouter, ARIAReporter',color:'var(--green)'},
+  {name:'ARIAReporter',type:'@Service',desc:'Async publishes ExecutionRecord to ARIA via Oracle AQ. Non-blocking. Retry on failure.',collab:'Oracle AQ, ARIAClient',color:'var(--green)'},
+  {name:'PluginHealthMonitor',type:'@Scheduled',desc:'Polls health endpoint of all registered plugins every 60s. Marks INACTIVE on failure.',collab:'AgentPluginRegistry, HTTP client',color:'var(--green)'},
+  {name:'CopilotAgentAdapter',type:'@Component',desc:'Implements AgentPlugin for GitHub Copilot. Wraps Copilot API. Returns agentReasoning.',collab:'AgentPlugin interface, Copilot API',color:'var(--green)'},
+  {name:'ClaudeAgentAdapter',type:'@Component',desc:'Implements AgentPlugin for Anthropic Claude via Spring AI. Returns agentReasoning.',collab:'AgentPlugin interface, Spring AI',color:'var(--green)'},
+];
+
+function buildC3(containerId, components, borderColor) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = components.map(c=>`
+    <div class="c3-comp" style="border-left-color:${c.color}">
+      <div class="c3-comp-name" style="color:${c.color}">${c.name}</div>
+      <div class="c3-comp-type">${c.type}</div>
+      <div class="c3-comp-desc">${c.desc}</div>
+      <div class="c3-comp-collab">Collaborates: ${c.collab}</div>
+    </div>`).join('');
+}
+buildC3('c3-core', c3core);
+buildC3('c3-mcp', c3mcp);
+buildC3('c3-runtime', c3runtime);
+
+// ── E2E FLOW ──
+const e2eSteps = [
+  {n:'01',color:'var(--amber)',stage:'Engineer Submits Request',comp:'aces-api: AuthController',desc:'POST /execute with agentId, task description, JWT token. Request enters the system.',decision:null},
+  {n:'02',color:'var(--amber)',stage:'JWT Validation',comp:'JwtAuthFilter',desc:'Spring Security validates JWT. Tenant ID and agent ID extracted. 401 returned if invalid.',decision:null},
+  {n:'03',color:'var(--amber)',stage:'Tenant Guard',comp:'TenantGuardInterceptor',desc:'Oracle VPD context set: DBMS_SESSION.SET_CONTEXT(\'ACES_CTX\',\'TENANT_ID\',tenantId). All downstream DB queries automatically scoped.',decision:null},
+  {n:'04',color:'var(--red)',stage:'Rate Limit Check',comp:'RateLimiterService',desc:'Token bucket checked for this tenant + tool combination. 429 Too Many Requests if exceeded.',decision:null},
+  {n:'05',color:'var(--blue)',stage:'ARIA Governance Check',comp:'aces-governance: ARIAClient',desc:'REST call to ARIA: GET /aria/decide with agentId, task context, environment. ARIA returns structured decision.',decision:null},
+  {n:'06',color:'var(--red)',stage:'BLOCK Decision',comp:'AuditLogger, Slack notifier',desc:'If ARIA returns BLOCK: execution rejected. Decision archaeology entry written to Oracle. Engineer notified via Slack with archaeology URL.',decision:{text:'→ BLOCK: request stops here. 403 returned.',color:'var(--redDim)',textColor:'var(--red)'}},
+  {n:'07',color:'var(--orange)',stage:'REQUIRES_APPROVAL',comp:'ApprovalGateService, JIRA adapter',desc:'If REQUIRES_APPROVAL: JIRA ticket auto-created. Engineering lead notified. ACES waits on approval gate. 202 Accepted returned to engineer.',decision:{text:'→ PAUSED: awaiting human approval.',color:'rgba(245,158,11,0.1)',textColor:'var(--amber)'}},
+  {n:'08',color:'var(--green)',stage:'ALLOW — Inject ARIA Context',comp:'ARIAContextInjector',desc:'Execution proceeds. Trust score (0.82), trust band (HIGH), and activeConstraints injected into AgentRequest.ariaContext.',decision:null},
+  {n:'09',color:'var(--amber)',stage:'Planner Decomposes Task',comp:'PlannerService, Spring AI',desc:'PlannerService receives request. Emits structured retrieval plan: list of subtasks, tools needed, ordering.',decision:null},
+  {n:'10',color:'var(--amber)',stage:'Orchestrator Starts Agentic Loop',comp:'OrchestratorService',desc:'Drives: Retrieve → Synthesize → Critic. Maximum 1 revision cycle. Hard stop after revision limit.',decision:null},
+  {n:'11',color:'var(--red)',stage:'Retriever Calls Tools (max 6 iterations)',comp:'RetrieverService → aces-mcp',desc:'For each tool needed: RetrieverService calls MCP pipeline. Each call goes through policy → validation → rate limit → circuit breaker.',decision:null},
+  {n:'12',color:'var(--red)',stage:'MCP Pipeline Per Tool Call',comp:'PolicyEvaluationService, ValidationFilter',desc:'YAML deny-by-default rules evaluated. Request schema validated. Rate limit checked again per tool.',decision:null},
+  {n:'13',color:'var(--red)',stage:'Tool Execution',comp:'ToolExecutionEngine, CacheManager',desc:'Tool invoked. Result cached if eligible (L1 ConcurrentHashMap, L2 Oracle Result Cache). Duration measured.',decision:null},
+  {n:'14',color:'var(--muted)',stage:'Audit Log Written',comp:'AuditLogger → Oracle ACES_AUDIT_LOG',desc:'Every tool call logged: timestamp, tenant, tool name, payload hash, result hash, duration, trace ID. Append-only. No UPDATE/DELETE.',decision:null},
+  {n:'15',color:'var(--amber)',stage:'Synthesizer Drafts Response',comp:'SynthesizerService, Spring AI ChatClient',desc:'Tool findings assembled. LLM called via Spring AI to produce structured response with citations [S1][S2].',decision:null},
+  {n:'16',color:'var(--amber)',stage:'Critic Evaluates',comp:'CriticService, Spring AI ChatClient',desc:'Draft evaluated by LLM. APPROVE → proceed. REVISE → one more Retriever → Synthesizer cycle. Hard stop after 1 revision.',decision:null},
+  {n:'17',color:'var(--blue)',stage:'Memory Updated',comp:'MemoryService → Oracle',desc:'Short-term memory updated in Oracle session cache. Long-term embedding upserted in Oracle AI Vector Search (1536 dimensions).',decision:null},
+  {n:'18',color:'var(--blue)',stage:'ARIA Execution Record Sent (Async)',comp:'ARIAReporter → Oracle AQ',desc:'ExecutionRecord published to Oracle AQ: agentReasoning (mandatory), tokenCount, status, durationMs. Non-blocking. Retry on failure.',decision:null},
+  {n:'19',color:'var(--green)',stage:'Response Returned to Engineer',comp:'aces-api: ResponseController',desc:'200 OK with result, traceId, and URL to Decision Archaeology record in ARIA.',decision:null},
+  {n:'20',color:'var(--blue)',stage:'ARIA Updates Trust Score (Async)',comp:'ARIA service (async)',desc:'ARIA processes ExecutionRecord. Trust score updated within 5 minutes. Future requests from this agent use updated score.',decision:null},
+];
+const e2eContainer = document.getElementById('e2e-steps');
+e2eSteps.forEach(s=>{
+  e2eContainer.innerHTML += `
+  <div class="flow-step">
+    <div class="flow-step-num">
+      <div class="flow-num-circle" style="background:${s.color}20;color:${s.color};border:1px solid ${s.color}40;">${s.n}</div>
+      <div class="flow-num-line"></div>
+    </div>
+    <div class="flow-content">
+      <div class="flow-content-header">
+        <span class="flow-stage" style="color:${s.color}">${s.stage}</span>
+        <span class="flow-component">${s.comp}</span>
+      </div>
+      <div class="flow-desc">${s.desc}</div>
+      ${s.decision?`<div class="flow-decision" style="background:${s.decision.color};color:${s.decision.textColor}">${s.decision.text}</div>`:''}
+    </div>
+  </div>`;
+});
+
+// ── SEQUENCE DIAGRAMS ──
+function buildSeq(containerId, actors, rows, accentColor) {
+  const c = document.getElementById(containerId);
+  const actorHtml = actors.map((a,i)=>`
+    <div class="seq-actor" style="border-color:${a.color||accentColor}30;background:${a.color||accentColor}08;color:${a.color||accentColor};">
+      ${a.name}
+    </div>`).join('');
+  const rowsHtml = rows.map(r=>{
+    if(r.divider) return `<div class="seq-divider">${r.divider}</div>`;
+    return `<div class="seq-row">
+      <span class="seq-from">${r.from||''}</span>
+      <span class="seq-dir">${r.dir||''}</span>
+      <span class="seq-to">${r.to||''}</span>
+      <span class="seq-msg">${r.msg||''}</span>
+      ${r.note?`<span class="seq-note">${r.note}</span>`:''}
+    </div>`;
+  }).join('');
+  c.innerHTML = `<div class="seq-actors">${actorHtml}</div><div class="seq-body">${rowsHtml}</div>`;
+}
+
+const seqActors1 = [
+  {name:'Engineer',color:'var(--amber)'},
+  {name:'aces-api',color:'var(--amber)'},
+  {name:'JwtFilter',color:'var(--muted)'},
+  {name:'ARIAClient',color:'var(--blue)'},
+  {name:'Orchestrator',color:'var(--amber)'},
+  {name:'MCP Pipeline',color:'var(--red)'},
+  {name:'LLM',color:'var(--green)'},
+  {name:'ARIAReporter',color:'var(--blue)'},
+];
+buildSeq('seq1', seqActors1, [
+  {from:'Engineer',dir:'→',to:'aces-api',msg:'POST /execute {agentId: copilot-v1, task, JWT}'},
+  {from:'aces-api',dir:'→',to:'JwtFilter',msg:'validate JWT'},
+  {from:'JwtFilter',dir:'←',to:'aces-api',msg:'200 OK — tenant=T1, agent=copilot-v1'},
+  {from:'aces-api',dir:'→',to:'ARIAClient',msg:'GET /aria/decide {agentId: copilot-v1, task, env: prod}'},
+  {from:'ARIAClient',dir:'←',to:'ARIA',msg:'{decision: ALLOW, trustScore: 0.82, constraints: []}',note:'ARIA response'},
+  {from:'aces-api',dir:'→',to:'Orchestrator',msg:'execute(task, ariaContext{trustScore:0.82})'},
+  {from:'Orchestrator',dir:'→',to:'Retriever',msg:'retrieve(subtasks)'},
+  {from:'Retriever',dir:'→',to:'MCP Pipeline',msg:'invokeTool("search-confluence", params)'},
+  {from:'MCP Pipeline',dir:'→',to:'Tool',msg:'execute (post policy ✓ rate ✓ circuit ✓)',note:'all gates pass'},
+  {from:'Tool',dir:'←',to:'MCP Pipeline',msg:'result'},
+  {from:'MCP Pipeline',dir:'→',to:'AuditLogger',msg:'log(invocation, result) → Oracle'},
+  {from:'Retriever',dir:'←',to:'Orchestrator',msg:'findings'},
+  {from:'Orchestrator',dir:'→',to:'Synthesizer',msg:'synthesize(findings)'},
+  {from:'Synthesizer',dir:'→',to:'LLM',msg:'prompt + context (via Spring AI)'},
+  {from:'LLM',dir:'←',to:'Synthesizer',msg:'draft response with citations'},
+  {from:'Orchestrator',dir:'→',to:'Critic',msg:'evaluate(draft)'},
+  {from:'Critic',dir:'←',to:'Orchestrator',msg:'APPROVE'},
+  {from:'aces-api',dir:'→',to:'ARIAReporter',msg:'async publish ExecutionRecord (Oracle AQ)'},
+  {from:'aces-api',dir:'←',to:'Engineer',msg:'200 OK {result, traceId, archaeologyUrl}'},
+], 'var(--green)');
+
+buildSeq('seq2', [
+  {name:'Engineer',color:'var(--amber)'},{name:'aces-api',color:'var(--amber)'},
+  {name:'ARIAClient',color:'var(--blue)'},{name:'AuditLogger',color:'var(--muted)'},
+  {name:'Slack',color:'var(--muted)'},
+], [
+  {from:'Engineer',dir:'→',to:'aces-api',msg:'POST /execute {agentId: mcp-infra-v1, task: "modify SecurityConfig.java", env: prod}'},
+  {from:'aces-api',dir:'→',to:'ARIAClient',msg:'GET /aria/decide {agentId: mcp-infra-v1, files: SecurityConfig.java, env: prod}'},
+  {from:'ARIAClient',dir:'←',to:'ARIA',msg:'{decision: BLOCK, trustScore: 0.29, reason: "5 prod incidents — declining trust"}'},
+  {from:'aces-api',dir:'→',to:'AuditLogger',msg:'log BLOCK decision — full archaeology written to Oracle'},
+  {from:'aces-api',dir:'→',to:'Slack',msg:'notify: "Agent mcp-infra-v1 BLOCKED. See archaeology: [url]"'},
+  {from:'aces-api',dir:'←',to:'Engineer',msg:'403 FORBIDDEN {decision: BLOCK, archaeology: [url], trustScore: 0.29}'},
+  {divider:'Execution never reaches ACES core or MCP pipeline. ARIA stops it at the gate.'},
+], 'var(--red)');
+
+buildSeq('seq3', [
+  {name:'Engineer',color:'var(--amber)'},{name:'aces-api',color:'var(--amber)'},
+  {name:'ARIAClient',color:'var(--blue)'},{name:'JIRA',color:'var(--muted)'},
+  {name:'Eng Lead',color:'var(--purple)'},{name:'Orchestrator',color:'var(--amber)'},
+], [
+  {from:'Engineer',dir:'→',to:'aces-api',msg:'POST /execute {agentId: copilot-v1, task: "modify auth config", env: prod}'},
+  {from:'aces-api',dir:'→',to:'ARIAClient',msg:'GET /aria/decide {agentId: copilot-v1, files: SecurityConfig.java, env: prod}'},
+  {from:'ARIAClient',dir:'←',to:'ARIA',msg:'{decision: REQUIRES_APPROVAL, reason: "auth config in prod requires human review"}'},
+  {from:'aces-api',dir:'→',to:'JIRA',msg:'createTicket: ACES-APPR-001 — approval required for auth config change'},
+  {from:'aces-api',dir:'→',to:'Slack',msg:'notify engineering lead: approval required [ACES-APPR-001]'},
+  {from:'aces-api',dir:'←',to:'Engineer',msg:'202 ACCEPTED {status: AWAITING_APPROVAL, ticketId: ACES-APPR-001}'},
+  {divider:'--- Engineering lead reviews change in JIRA. Confirms it is safe. Approves. ---'},
+  {from:'Eng Lead',dir:'→',to:'JIRA',msg:'APPROVE ACES-APPR-001 — "Reviewed. Auth config change is safe."'},
+  {from:'JIRA',dir:'→',to:'aces-api',msg:'webhook: ACES-APPR-001 APPROVED by engLead@jpmc.com'},
+  {from:'aces-api',dir:'→',to:'ARIAClient',msg:'POST /aria/override {decisionId, approverId, comment} — override logged'},
+  {from:'aces-api',dir:'→',to:'Orchestrator',msg:'[execution proceeds — same as happy path from step 5 onwards]'},
+  {from:'aces-api',dir:'←',to:'Engineer',msg:'200 OK {result, traceId, archaeologyUrl} — includes override record'},
+], 'var(--purple)');
+
+// ── DATA ARCHITECTURE ──
+const dataCaps = [
+  {title:'Relational Data',what:'Trust profiles, decisions, plugins, tools, audit log, cost ledger, approval records, specs, tasks',replaces:'PostgreSQL / MySQL'},
+  {title:'AI Vector Search',what:'Agent LTM embeddings. Semantic caching. Spec similarity. Decision pattern matching. VECTOR_DISTANCE SQL function.',replaces:'Qdrant, Pinecone, pgvector'},
+  {title:'Oracle Text',what:'Full-text search on tool registry, audit logs, decision archaeology. CONTAINS() queries. Relevance ranking.',replaces:'Elasticsearch'},
+  {title:'Advanced Queuing (AQ)',what:'Async ARIA Reporter delivery. Transactional — committed with the data write. Guaranteed delivery. No partial failures.',replaces:'Kafka, RabbitMQ (Phase 1)'},
+  {title:'VPD (Virtual Private DB)',what:'Row-level security at the Oracle engine. Every query automatically filtered by tenant_id. Transparent to application code.',replaces:'Application-level tenant filters'},
+  {title:'Unified Audit',what:'DB-level audit of every data access. SIEM-ready. SOX compliant. 7-year retention via partitioning.',replaces:'Application-only logging'},
+  {title:'Result Cache',what:'Query-level caching at the engine. Repeated identical queries served from cache. Configurable TTL per query.',replaces:'Redis (Phase 1 — Oracle sufficient)'},
+  {title:'JSON Native (23ai)',what:'Store IR, task graphs, plugin manifests, policy YAML as JSON columns. Native JSON_VALUE, JSON_EXISTS functions.',replaces:'MongoDB, document stores'},
+];
+const dataCapsContainer = document.getElementById('data-caps');
+dataCapsContainer.innerHTML = dataCaps.map(d=>`
+  <div class="data-cap">
+    <div class="data-cap-title">${d.title}</div>
+    <div class="data-cap-what">${d.what}</div>
+    <div class="data-cap-replaces">Replaces: ${d.replaces}</div>
+  </div>`).join('');
+
+const dataP2 = document.getElementById('data-phase2');
+dataP2.innerHTML = `
+  <div class="data-p2">
+    <div class="data-p2-title">Redis — Phase 2</div>
+    <div class="data-p2-desc">Added when throughput demands sub-millisecond rate limiting and distributed session management. Token buckets per tenant per tool. Spring Cache abstraction means switching from ConcurrentHashMap to Redis requires zero application code changes — only configuration.</div>
+  </div>
+  <div class="data-p2">
+    <div class="data-p2-title">Kafka — Phase 3 (only if needed)</div>
+    <div class="data-p2-desc">Added only if Oracle AQ throughput becomes a bottleneck at org-wide Phase 3 scale. Oracle AQ handles thousands of messages per second — sufficient for Phase 1 and 2. Do not add Kafka speculatively. The Spring integration means switching from AQ to Kafka is a configuration change, not an architecture change.</div>
+  </div>`;
+
+// Schema table
+const schemaTables = [
+  ['ACES_PLUGINS','aces-runtime','plugin_id (PK), display_name, layer, type, version, status, trustable, cost_unit, cost_rate, registered_at, tenant_id'],
+  ['ACES_EXECUTIONS','aces-runtime','execution_id (PK), agent_id (FK), tenant_id, task_type, status, token_count, duration_ms, agent_reasoning CLOB, confidence, created_at'],
+  ['ACES_TOOL_REGISTRY','aces-mcp','tool_id (PK), tool_name, version, schema_json CLOB, rate_limit, tenant_id, status, registered_at'],
+  ['ACES_TOOL_INVOCATIONS','aces-mcp','invocation_id (PK), tool_name, tenant_id, execution_id (FK), payload_hash, result_hash, duration_ms, status, trace_id, created_at'],
+  ['ACES_AUDIT_LOG','aces-mcp','log_id (PK), event_type, tenant_id, agent_id, tool_name, trace_id, created_at, details CLOB — APPEND-ONLY'],
+  ['ACES_APPROVALS','aces-core','approval_id (PK), execution_id (FK), tenant_id, status, requested_at, approved_by, approved_at, jira_ticket'],
+  ['ACES_MEMORY_LTM','aces-core','memory_id (PK), agent_id, tenant_id, content CLOB, embedding VECTOR(1536), created_at, last_accessed'],
+  ['ACES_POLICY_RULES','aces-mcp','rule_id (PK), rule_name, rule_yaml CLOB, tenant_id, enabled, version, created_at'],
+  ['ACES_SPECS','aces-spec-engine (P2)','spec_id (PK), spec_name, version, yaml_content CLOB, ir_json CLOB, status, tenant_id, created_by'],
+  ['ACES_TASKS','aces-spec-engine (P2)','task_id (PK), spec_id (FK), task_type, dependencies JSON, payload JSON, status, started_at, completed_at'],
+];
+const schemaT = document.getElementById('schema-table');
+schemaTables.forEach(([table,module,cols],i)=>{
+  schemaT.innerHTML += `<tr style="background:${i%2===0?'var(--surface)':'var(--bg)'}">
+    <td style="padding:8px 12px;font-family:var(--mono);font-weight:600;font-size:10px;color:var(--oracle);">${table}</td>
+    <td style="padding:8px 12px;font-family:var(--mono);font-size:9px;color:var(--blue);">${module}</td>
+    <td style="padding:8px 12px;font-family:var(--mono);font-size:9px;color:var(--muted);">${cols}</td>
+  </tr>`;
+});
+
+// ── SPEC PIPELINE ──
+const specSteps = [
+  {n:'1',title:'SPEC',desc:'Engineer writes YAML describing goal, services, agents, policies, infra. Human-readable. Version-controlled in Git.',color:'var(--purple)'},
+  {n:'2',title:'VALIDATE',desc:'JSON Schema validation. All required fields present. Types correct. Constraints legal.',color:'var(--purple)'},
+  {n:'3',title:'IR',desc:'Validated YAML → SystemIR. Strictly-typed Java object graph. Same YAML = same IR. No LLM involved here.',color:'var(--purple)'},
+  {n:'4',title:'DAG PLAN',desc:'IR → DAG of TaskNodes. Dependencies resolved. Parallel tasks identified. Execution order set.',color:'var(--purple)'},
+  {n:'5',title:'ARIA GATE',desc:'ARIA validates the spec before generation. Risk scored. PCI checked. High-risk specs blocked.',color:'var(--blue)'},
+  {n:'6',title:'GENERATE',desc:'For each DAG task: Freemarker template (skeleton) + LLM completion (business logic). Spring Boot code produced.',color:'var(--amber)'},
+  {n:'7',title:'VALIDATE + FIX',desc:'Compilation check → unit tests → API contracts → ARIA security scan. Failures fed back to LLM. Max 3 iterations.',color:'var(--green)'},
+];
+const specPipeline = document.getElementById('spec-pipeline');
+specPipeline.innerHTML = specSteps.map((s,i)=>`
+  <div class="spec-step" style="background:${s.color}08;">
+    <div class="spec-step-num">STAGE ${s.n}</div>
+    <div class="spec-step-title" style="color:${s.color}">${s.title}</div>
+    <div class="spec-step-desc">${s.desc}</div>
+    ${i<specSteps.length-1?`<div class="spec-arrow" style="background:${s.color}">→</div>`:''}
+  </div>`).join('');
+
+// ── SPEC TYPES ──
+const specTypes = [
+  {name:'Business Spec',color:'var(--amber)',yaml:`goal: "Detect fraud"
+constraints:
+  latency_ms: 200
+  compliance:
+    - PCI-DSS`,generates:'Architecture plan + service decomposition'},
+  {name:'Functional Spec',color:'var(--blue)',yaml:`services:
+  - name: fraud-detector
+    type: ai-service
+    input: transaction
+    output: risk-score`,generates:'Spring Boot service + controller + JPA'},
+  {name:'Agent Spec',color:'var(--green)',yaml:`agent:
+  name: decision-agent
+  model: claude-sonnet
+  tools:
+    - oracle-db
+    - risk-api`,generates:'Spring AI agent + tool implementations'},
+  {name:'Policy Spec',color:'var(--purple)',yaml:`policies:
+  pii: mask
+  hallucination: block
+  risk_threshold: 0.8`,generates:'ARIA policy plugin registration'},
+  {name:'Architecture Spec',color:'var(--oracle)',yaml:`architecture:
+  runtime: spring-boot
+  database: oracle-23ai
+  language: java-21`,generates:'application.yml + Flyway + module structure'},
+];
+document.getElementById('spec-types').innerHTML = specTypes.map(s=>`
+  <div class="spec-type" style="border-top:3px solid ${s.color}">
+    <div class="spec-type-name" style="color:${s.color}">${s.name}</div>
+    <div class="spec-yaml">${s.yaml}</div>
+    <div class="spec-generates">→ ${s.generates}</div>
+  </div>`).join('');
+
+// Draw C1 lines after layout
+window.addEventListener('load', ()=>{ setTimeout(drawC1Lines, 200); });
+window.addEventListener('resize', drawC1Lines);
+</script>
+</body>
+</html>

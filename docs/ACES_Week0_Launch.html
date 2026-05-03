@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ACES — Week 0 Project Launch</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090f;--s:#0b0f1a;--card:#0f1520;--border:#1a2535;
+  --accent:#f59e0b;--blue:#00c8ff;--green:#00e57a;
+  --red:#ff4566;--purple:#8b5cf6;
+  --text:#dde6f0;--muted:#4a6080;--dim:#1a2535;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+.hdr{
+  background:var(--s);border-bottom:1px solid var(--border);
+  padding:14px 32px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.hdr-brand{display:flex;align-items:center;gap:10px;}
+.hdr-logo{
+  width:30px;height:30px;border-radius:6px;
+  background:linear-gradient(135deg,var(--accent),#b45309);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#000;
+}
+.status-bar{display:flex;gap:16px;}
+.sb-item{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.sb-item span{color:var(--accent);}
+
+.main{max-width:1100px;margin:0 auto;padding:32px 24px;}
+
+/* Section */
+.section{margin-bottom:48px;}
+.section-tag{
+  display:inline-block;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:2px;padding:3px 10px;border-radius:3px;margin-bottom:12px;
+}
+.tag-amber{background:rgba(245,158,11,0.1);color:var(--accent);border:1px solid rgba(245,158,11,0.3);}
+.tag-blue{background:rgba(0,200,255,0.1);color:var(--blue);border:1px solid rgba(0,200,255,0.3);}
+.tag-green{background:rgba(0,229,122,0.1);color:var(--green);border:1px solid rgba(0,229,122,0.3);}
+.tag-red{background:rgba(255,69,102,0.1);color:var(--red);border:1px solid rgba(255,69,102,0.3);}
+.tag-purple{background:rgba(139,92,246,0.1);color:var(--purple);border:1px solid rgba(139,92,246,0.3);}
+
+.section-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:6px;}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.7;max-width:700px;}
+
+/* Alert box */
+.alert{
+  border-radius:8px;padding:16px 20px;margin-bottom:20px;
+  border-left:3px solid;
+}
+.alert-amber{background:rgba(245,158,11,0.06);border-color:var(--accent);}
+.alert-blue{background:rgba(0,200,255,0.06);border-color:var(--blue);}
+.alert-green{background:rgba(0,229,122,0.06);border-color:var(--green);}
+.alert-red{background:rgba(255,69,102,0.06);border-color:var(--red);}
+.alert-title{font-size:11px;font-weight:700;letter-spacing:1px;font-family:'DM Mono',monospace;margin-bottom:6px;}
+.alert-text{font-size:12px;color:var(--muted);line-height:1.7;}
+
+/* Day card */
+.day-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.day-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:20px;
+}
+.day-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.day-num{
+  width:36px;height:36px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+}
+.day-title{font-size:13px;font-weight:600;}
+.day-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+
+/* Task list */
+.task-list{display:flex;flex-direction:column;gap:8px;}
+.task{
+  background:var(--s);border:1px solid var(--border);
+  border-radius:6px;padding:10px 12px;
+}
+.task-header{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;}
+.task-num{
+  font-family:'DM Mono',monospace;font-size:9px;
+  color:var(--accent);flex-shrink:0;margin-top:1px;min-width:20px;
+}
+.task-title{font-size:11px;font-weight:600;}
+.task-desc{font-size:10px;color:var(--muted);line-height:1.5;margin-left:28px;}
+.task-owner{
+  display:inline-block;margin-top:4px;margin-left:28px;
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  padding:1px 6px;border-radius:2px;
+}
+.owner-arch{background:rgba(245,158,11,0.1);color:var(--accent);}
+.owner-be{background:rgba(0,200,255,0.1);color:var(--blue);}
+.owner-devops{background:rgba(0,229,122,0.1);color:var(--green);}
+.owner-data{background:rgba(139,92,246,0.1);color:var(--purple);}
+.owner-all{background:rgba(255,255,255,0.06);color:var(--muted);}
+.owner-fe{background:rgba(255,69,102,0.1);color:var(--red);}
+
+/* Code block */
+.code-wrap{position:relative;margin:12px 0;}
+.code-block{
+  background:var(--s);border:1px solid var(--border);border-radius:8px;
+  padding:16px;font-family:'DM Mono',monospace;font-size:11px;
+  line-height:1.8;overflow-x:auto;color:var(--muted);
+  white-space:pre;
+}
+.code-block .kw{color:var(--accent);}
+.code-block .str{color:var(--green);}
+.code-block .cmt{color:var(--dim);font-style:italic;}
+.code-block .cls{color:#ff9d00;}
+.code-block .ann{color:var(--purple);}
+.code-block .num{color:var(--blue);}
+.copy-btn{
+  position:absolute;top:8px;right:8px;
+  background:var(--dim);border:1px solid var(--border);
+  color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;
+  padding:3px 8px;border-radius:3px;cursor:pointer;letter-spacing:1px;
+  transition:all 0.2s;
+}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* Structure tree */
+.tree{
+  background:var(--s);border:1px solid var(--border);border-radius:8px;
+  padding:16px;font-family:'DM Mono',monospace;font-size:11px;
+  line-height:2;color:var(--muted);
+}
+.tree .dir{color:var(--accent);font-weight:500;}
+.tree .file{color:var(--text);}
+.tree .cmt{color:var(--dim);}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.tbl th{
+  text-align:left;padding:8px 12px;
+  background:var(--card);color:var(--muted);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  border-bottom:1px solid var(--border);
+}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.tbl tr:last-child td{border:none;}
+.tbl tr:hover td{background:rgba(255,255,255,0.01);}
+
+/* Decision list */
+.decision-list{display:flex;flex-direction:column;gap:8px;}
+.decision{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:14px 16px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.dec-icon{font-size:20px;flex-shrink:0;}
+.dec-title{font-size:12px;font-weight:600;margin-bottom:3px;}
+.dec-text{font-size:11px;color:var(--muted);line-height:1.6;}
+.dec-answer{
+  font-family:'DM Mono',monospace;font-size:10px;
+  margin-top:5px;padding:3px 8px;border-radius:3px;display:inline-block;
+}
+
+/* Progress tracker */
+.progress-wrap{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:20px;margin-bottom:24px;
+}
+.progress-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;}
+.progress-steps{display:flex;align-items:center;gap:0;}
+.ps{flex:1;text-align:center;position:relative;}
+.ps-dot{
+  width:32px;height:32px;border-radius:50%;
+  margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:11px;font-weight:600;
+}
+.ps-dot.current{background:var(--accent);color:#000;box-shadow:0 0 12px rgba(245,158,11,0.4);}
+.ps-dot.todo{background:var(--dim);color:var(--muted);border:1px solid var(--border);}
+.ps-dot.done{background:var(--green);color:#000;}
+.ps-label{font-size:10px;color:var(--muted);}
+.ps-sub{font-size:9px;color:var(--dim);margin-top:2px;}
+.ps-line{flex:1;height:1px;background:var(--border);}
+.ps-line.done{background:var(--green);}
+
+/* Non-negotiable box */
+.non-neg{
+  background:rgba(255,69,102,0.04);border:2px solid rgba(255,69,102,0.3);
+  border-radius:10px;padding:20px;
+}
+.non-neg-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--red);margin-bottom:12px;font-weight:700;}
+.nn-item{display:flex;gap:10px;margin-bottom:8px;font-size:12px;line-height:1.6;}
+.nn-num{color:var(--red);font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">A</div>
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">ACES — Week 0 Project Launch</div>
+      <div style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;">GREENFIELD · LOCAL DEV · TEAM ASSEMBLING</div>
+    </div>
+  </div>
+  <div class="status-bar">
+    <div class="sb-item">Phase <span>1 of 3</span></div>
+    <div class="sb-item">Week <span>0</span></div>
+    <div class="sb-item">Status <span style="color:var(--accent);">PRE-KICKOFF</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-title">ACES BUILD JOURNEY</div>
+    <div class="progress-steps">
+      <div class="ps">
+        <div class="ps-dot current">W0</div>
+        <div class="ps-label" style="color:var(--accent);">Align</div>
+        <div class="ps-sub">You are here</div>
+      </div>
+      <div class="ps-line"></div>
+      <div class="ps">
+        <div class="ps-dot todo">W1</div>
+        <div class="ps-label">Scaffold</div>
+        <div class="ps-sub">Project structure</div>
+      </div>
+      <div class="ps-line"></div>
+      <div class="ps">
+        <div class="ps-dot todo">W2</div>
+        <div class="ps-label">Skeleton</div>
+        <div class="ps-sub">Module boundaries</div>
+      </div>
+      <div class="ps-line"></div>
+      <div class="ps">
+        <div class="ps-dot todo">S1</div>
+        <div class="ps-label">Foundation</div>
+        <div class="ps-sub">Core services</div>
+      </div>
+      <div class="ps-line"></div>
+      <div class="ps">
+        <div class="ps-dot todo">S2</div>
+        <div class="ps-label">Pipeline</div>
+        <div class="ps-sub">MCP + tools</div>
+      </div>
+      <div class="ps-line"></div>
+      <div class="ps">
+        <div class="ps-dot todo">S3</div>
+        <div class="ps-label">Loop</div>
+        <div class="ps-sub">Agentic flow</div>
+      </div>
+      <div class="ps-line"></div>
+      <div class="ps">
+        <div class="ps-dot todo">S4</div>
+        <div class="ps-label">Pilot</div>
+        <div class="ps-sub">Teams onboard</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY WEEK 0 -->
+  <div class="section">
+    <span class="section-tag tag-amber">PROJECT LEAD BRIEFING</span>
+    <div class="section-title">Why Week 0 Exists</div>
+    <div class="section-sub">The biggest risk on a greenfield project is not technical. It is misalignment. Teams that skip Week 0 spend Sprint 1 building in five directions and Sprint 2 tearing it down. Week 0 costs 5 days and saves 3 sprints.</div>
+
+    <div class="alert alert-amber">
+      <div class="alert-title">THE RULE OF GREENFIELD PROJECTS</div>
+      <div class="alert-text">No engineer writes domain code until: (1) everyone has read the architecture document, (2) every engineer can answer "what layer does my code live in?", (3) the project scaffold is committed and everyone has pulled it. These three gates must be cleared before Sprint 1 Day 1.</div>
+    </div>
+  </div>
+
+  <!-- WEEK 0 SCHEDULE -->
+  <div class="section">
+    <span class="section-tag tag-amber">WEEK 0 — 5 DAYS</span>
+    <div class="section-title">Day-by-Day Schedule</div>
+    <div class="section-sub">Every day has a specific owner, output, and done-definition. A day is not complete until its output exists and is shared with the team.</div>
+
+    <div class="day-grid">
+
+      <!-- DAY 1 -->
+      <div class="day-card">
+        <div class="day-header">
+          <div class="day-num" style="background:rgba(245,158,11,0.1);color:var(--accent);">D1</div>
+          <div>
+            <div class="day-title">Architecture Alignment</div>
+            <div class="day-sub">Everyone · 3-hour session · no laptops open</div>
+          </div>
+        </div>
+        <div class="task-list">
+          <div class="task">
+            <div class="task-header"><span class="task-num">1.1</span><span class="task-title">Walk through the team briefing document — all 8 sections</span></div>
+            <div class="task-desc">You (Santosh) present. Every engineer reads their role assignment aloud. No questions yet — just absorb.</div>
+            <span class="task-owner owner-all">ALL ENGINEERS · 60 min</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">1.2</span><span class="task-title">Architecture Q&A — 3 mandatory questions per engineer</span></div>
+            <div class="task-desc">Every engineer must ask at least 3 questions. If someone has no questions, they have not understood. Answers go into a shared doc.</div>
+            <span class="task-owner owner-all">ALL ENGINEERS · 45 min</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">1.3</span><span class="task-title">The "which layer?" quiz</span></div>
+            <div class="task-desc">You name a capability. Each engineer writes which layer it belongs to. Disagreements = architecture gaps. Resolve before moving on.</div>
+            <span class="task-owner owner-all">ALL ENGINEERS · 30 min</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">1.4</span><span class="task-title">Non-negotiables read-aloud</span></div>
+            <div class="task-desc">Every engineer reads one Golden Rule from the document and explains it in their own words. If they cannot, it gets discussed until they can.</div>
+            <span class="task-owner owner-all">ALL ENGINEERS · 30 min</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:8px 10px;background:rgba(0,229,122,0.06);border-radius:5px;font-size:10px;color:var(--green);">
+          ✓ Done when: Every engineer can answer "what layer does my code live in?" without hesitation.
+        </div>
+      </div>
+
+      <!-- DAY 2 -->
+      <div class="day-card">
+        <div class="day-header">
+          <div class="day-num" style="background:rgba(0,200,255,0.1);color:var(--blue);">D2</div>
+          <div>
+            <div class="day-title">Architecture Decisions (ADRs)</div>
+            <div class="day-sub">Architect + Tech Leads · Decisions locked before code</div>
+          </div>
+        </div>
+        <div class="task-list">
+          <div class="task">
+            <div class="task-header"><span class="task-num">2.1</span><span class="task-title">Decide and lock: Spring Boot project structure</span></div>
+            <div class="task-desc">Monorepo vs multi-repo. Single service vs microservices for ACES. Decision must be made today and not revisited.</div>
+            <span class="task-owner owner-arch">ARCHITECT · 45 min</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">2.2</span><span class="task-title">Decide and lock: Package naming convention</span></div>
+            <div class="task-desc">com.jpmc.aces.{layer}.{module} — agree the exact convention. Every class follows it. No exceptions.</div>
+            <span class="task-owner owner-arch">ARCHITECT + BE LEADS · 20 min</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">2.3</span><span class="task-title">Decide and lock: LangChain4j vs Spring AI</span></div>
+            <div class="task-desc">Both support Java. LangChain4j has more MCP tooling. Spring AI integrates cleaner with Spring Boot. Pick one. My recommendation: LangChain4j for ACES.</div>
+            <span class="task-owner owner-arch">ARCHITECT + ACES BE LEAD · 30 min</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">2.4</span><span class="task-title">Decide and lock: Oracle connection pooling strategy</span></div>
+            <div class="task-desc">HikariCP (Spring default) with Oracle ADB wallet. Agree connection pool size, timeout, and tenant context injection approach.</div>
+            <span class="task-owner owner-data">DATA ENGINEER + DEVOPS · 30 min</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">2.5</span><span class="task-title">Decide and lock: Git branching strategy</span></div>
+            <div class="task-desc">Trunk-based development recommended. Feature branches per ticket, max 2 days open, PR required before merge. No long-lived feature branches.</div>
+            <span class="task-owner owner-devops">DEVOPS · 20 min</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:8px 10px;background:rgba(0,229,122,0.06);border-radius:5px;font-size:10px;color:var(--green);">
+          ✓ Done when: ADR doc with 5 locked decisions committed to the repo wiki.
+        </div>
+      </div>
+
+      <!-- DAY 3 -->
+      <div class="day-card">
+        <div class="day-header">
+          <div class="day-num" style="background:rgba(0,229,122,0.1);color:var(--green);">D3</div>
+          <div>
+            <div class="day-title">Local Dev Environment Setup</div>
+            <div class="day-sub">DevOps lead · Everyone gets running · No exceptions</div>
+          </div>
+        </div>
+        <div class="task-list">
+          <div class="task">
+            <div class="task-header"><span class="task-num">3.1</span><span class="task-title">Write and distribute the Developer Setup Guide</span></div>
+            <div class="task-desc">One document. Every engineer follows it step by step. If any step fails on any machine — fix the guide before moving on. The guide is the source of truth.</div>
+            <span class="task-owner owner-devops">DEVOPS ENGINEER · morning</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">3.2</span><span class="task-title">Install: Java 21, Maven, Docker, Git, IntelliJ/VS Code</span></div>
+            <div class="task-desc">Java 21 LTS mandatory. Maven 3.9+. Docker for Redis + Qdrant local. Every engineer on identical tooling versions.</div>
+            <span class="task-owner owner-all">ALL ENGINEERS</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">3.3</span><span class="task-title">Run Redis + Qdrant + Elasticsearch locally via Docker Compose</span></div>
+            <div class="task-desc">DevOps provides docker-compose.yml. Every engineer runs it. Every engineer confirms all three services are reachable.</div>
+            <span class="task-owner owner-devops">DEVOPS writes · ALL run</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">3.4</span><span class="task-title">Create GitHub org repo, branch protection, and PR template</span></div>
+            <div class="task-desc">Repo created. Main branch protected (PR + 1 approval required). PR template includes: what changed, which layer, test evidence, ARIA impact.</div>
+            <span class="task-owner owner-devops">DEVOPS ENGINEER</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">3.5</span><span class="task-title">Every engineer clones repo and confirms build passes</span></div>
+            <div class="task-desc">mvn clean install must pass on every machine. If it fails on any machine — fix it before end of day. No engineer is left behind.</div>
+            <span class="task-owner owner-all">ALL ENGINEERS · end of day</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:8px 10px;background:rgba(0,229,122,0.06);border-radius:5px;font-size:10px;color:var(--green);">
+          ✓ Done when: Every engineer runs mvn clean install successfully on their own machine.
+        </div>
+      </div>
+
+      <!-- DAY 4 -->
+      <div class="day-card">
+        <div class="day-header">
+          <div class="day-num" style="background:rgba(139,92,246,0.1);color:var(--purple);">D4</div>
+          <div>
+            <div class="day-title">Project Scaffold</div>
+            <div class="day-sub">ACES BE Lead + Architect · The skeleton everyone builds on</div>
+          </div>
+        </div>
+        <div class="task-list">
+          <div class="task">
+            <div class="task-header"><span class="task-num">4.1</span><span class="task-title">Create Spring Boot project via Spring Initializr</span></div>
+            <div class="task-desc">Group: com.jpmc, Artifact: aces-platform, Java 21, Maven, Spring Boot 3.x. Dependencies: Web, Security, Data JPA, Redis, Actuator, Validation.</div>
+            <span class="task-owner owner-be">ACES BE LEAD</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">4.2</span><span class="task-title">Create the exact package structure (see below)</span></div>
+            <div class="task-desc">Empty packages with placeholder README.md in each. The structure is the architecture made visible in code. Every module boundary must be explicit.</div>
+            <span class="task-owner owner-arch">ARCHITECT + ACES BE LEAD</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">4.3</span><span class="task-title">Add pom.xml with all Phase 1 dependencies</span></div>
+            <div class="task-desc">LangChain4j, Spring Security OAuth2, Resilience4j, HikariCP, Lettuce (Redis), Oracle JDBC, OpenTelemetry. Versions locked. No snapshots.</div>
+            <span class="task-owner owner-be">ACES BE LEAD</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">4.4</span><span class="task-title">application.yml with all config placeholders</span></div>
+            <div class="task-desc">Every service has a config key. No hardcoded values anywhere. Secrets use ${VAULT_SECRET_NAME} placeholders. Oracle wallet path configurable.</div>
+            <span class="task-owner owner-devops">DEVOPS + ACES BE LEAD</span>
+          </div>
+          <div class="task">
+            <div class="task-header"><span class="task-num">4.5</span><span class="task-title">Commit scaffold + every engineer pulls + confirms build</span></div>
+            <div class="task-desc">Push to main via PR. Every engineer pulls. Every engineer runs mvn clean install. This is the first team-wide build. If it fails anywhere — fix it.</div>
+            <span class="task-owner owner-all">ALL ENGINEERS · end of day</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:8px 10px;background:rgba(0,229,122,0.06);border-radius:5px;font-size:10px;color:var(--green);">
+          ✓ Done when: Scaffold committed, pulled, and built by every engineer. Package structure visible in IDE.
+        </div>
+      </div>
+
+      <!-- DAY 5 -->
+      <div class="day-card" style="grid-column:1/-1;">
+        <div class="day-header">
+          <div class="day-num" style="background:rgba(255,69,102,0.1);color:var(--red);">D5</div>
+          <div>
+            <div class="day-title">Sprint 1 Planning + Ticket Creation</div>
+            <div class="day-sub">Everyone · Sprint 1 starts Monday · Every ticket has one owner before end of day</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="task-list">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">MORNING — TICKET CREATION</div>
+            <div class="task">
+              <div class="task-header"><span class="task-num">5.1</span><span class="task-title">Create Sprint 1 tickets in JIRA/GitHub Projects</span></div>
+              <div class="task-desc">Every Sprint 1 task from the briefing document becomes a ticket. No ticket = no work. Ticket format: ACES-{num}: {component} — {deliverable}.</div>
+              <span class="task-owner owner-arch">ARCHITECT + SCRUM MASTER</span>
+            </div>
+            <div class="task">
+              <div class="task-header"><span class="task-num">5.2</span><span class="task-title">Estimate every ticket (story points or hours)</span></div>
+              <div class="task-desc">Team estimates together. If anyone disagrees by more than 2x — discuss until aligned. No ticket should be estimated alone.</div>
+              <span class="task-owner owner-all">ALL ENGINEERS · 90 min</span>
+            </div>
+          </div>
+          <div class="task-list">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">AFTERNOON — ASSIGNMENT</div>
+            <div class="task">
+              <div class="task-header"><span class="task-num">5.3</span><span class="task-title">Assign every Sprint 1 ticket to one engineer</span></div>
+              <div class="task-desc">Every ticket has exactly one owner before end of day. No shared ownership. If a ticket needs two people — split it into two tickets.</div>
+              <span class="task-owner owner-arch">ARCHITECT</span>
+            </div>
+            <div class="task">
+              <div class="task-header"><span class="task-num">5.4</span><span class="task-title">Define Definition of Done for Sprint 1</span></div>
+              <div class="task-desc">DoD: Code committed, PR reviewed and merged, unit tests written and passing, component reachable via local API call. All four gates required.</div>
+              <span class="task-owner owner-all">ALL ENGINEERS</span>
+            </div>
+          </div>
+          <div class="task-list">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">END OF DAY — READY CHECK</div>
+            <div class="task">
+              <div class="task-header"><span class="task-num">5.5</span><span class="task-title">Each engineer states their Sprint 1 goal in one sentence</span></div>
+              <div class="task-desc">Go around the room. Each engineer says: "By end of Sprint 1, I will have delivered X, which proves Y." If they cannot state it clearly — the ticket is not clear enough.</div>
+              <span class="task-owner owner-all">ALL ENGINEERS</span>
+            </div>
+            <div class="task">
+              <div class="task-header"><span class="task-num">5.6</span><span class="task-title">Set daily standup time and format</span></div>
+              <div class="task-desc">15 minutes max. Three questions only: What did I complete? What will I complete today? What is blocking me? No status updates. Blockers resolved same day.</div>
+              <span class="task-owner owner-arch">SCRUM MASTER</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:8px 10px;background:rgba(0,229,122,0.06);border-radius:5px;font-size:10px;color:var(--green);">
+          ✓ Done when: Every Sprint 1 ticket is created, estimated, assigned, and every engineer can state their sprint goal in one sentence.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PROJECT STRUCTURE -->
+  <div class="section">
+    <span class="section-tag tag-blue">DAY 4 DELIVERABLE</span>
+    <div class="section-title">ACES Project Structure</div>
+    <div class="section-sub">This is the exact package layout to create on Day 4. Every module boundary reflects a layer boundary from the architecture. Never mix concerns across packages.</div>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <div class="code-block">aces-platform/
+├── <span class="dir">src/main/java/com/jpmc/aces/</span>
+│   │
+│   ├── <span class="dir">core/</span>                          <span class="cmt"># ACES Core — agentic orchestration</span>
+│   │   ├── <span class="dir">orchestrator/</span>              <span class="cmt"># Orchestrator — one revise loop</span>
+│   │   ├── <span class="dir">planner/</span>                   <span class="cmt"># Planner — emits retrieval plan</span>
+│   │   ├── <span class="dir">retriever/</span>                 <span class="cmt"># Retriever — bounded tool loop</span>
+│   │   ├── <span class="dir">synthesizer/</span>               <span class="cmt"># Synthesizer — drafts reply</span>
+│   │   ├── <span class="dir">critic/</span>                    <span class="cmt"># Critic — approves or revises</span>
+│   │   ├── <span class="dir">memory/</span>                    <span class="cmt"># STM (Redis) + LTM (Qdrant)</span>
+│   │   └── <span class="dir">agent/</span>                     <span class="cmt"># Agent runtime + plugin adapters</span>
+│   │
+│   ├── <span class="dir">mcp/</span>                           <span class="cmt"># ACES MCP Server — control & dispatch</span>
+│   │   ├── <span class="dir">auth/</span>                      <span class="cmt"># Auth middleware — OAuth2 + JWT</span>
+│   │   ├── <span class="dir">policy/</span>                    <span class="cmt"># Policy engine — YAML rules</span>
+│   │   ├── <span class="dir">validation/</span>                <span class="cmt"># Pydantic-style schema validation</span>
+│   │   ├── <span class="dir">tenant/</span>                    <span class="cmt"># Tenant guard + context</span>
+│   │   ├── <span class="dir">ratelimit/</span>                 <span class="cmt"># Redis token bucket rate limiter</span>
+│   │   ├── <span class="dir">circuitbreaker/</span>            <span class="cmt"># Resilience4j circuit breaker</span>
+│   │   ├── <span class="dir">retry/</span>                     <span class="cmt"># Retry + ATBA (jitter backoff)</span>
+│   │   └── <span class="dir">dispatch/</span>                  <span class="cmt"># JSON-RPC 2.0 dispatcher</span>
+│   │
+│   ├── <span class="dir">tool/</span>                          <span class="cmt"># Tool Execution Engine</span>
+│   │   ├── <span class="dir">engine/</span>                    <span class="cmt"># Atomic + composed + workflow</span>
+│   │   ├── <span class="dir">registry/</span>                  <span class="cmt"># Versioned tool catalog (Oracle)</span>
+│   │   ├── <span class="dir">cache/</span>                     <span class="cmt"># L1 in-process + L2 Redis</span>
+│   │   ├── <span class="dir">lock/</span>                      <span class="cmt"># NX distributed lock manager</span>
+│   │   └── <span class="dir">workflow/</span>                  <span class="cmt"># DAG-based workflow engine</span>
+│   │
+│   ├── <span class="dir">plugin/</span>                        <span class="cmt"># Plugin contract + registry</span>
+│   │   ├── <span class="dir">contract/</span>                  <span class="cmt"># Plugin interface definitions</span>
+│   │   ├── <span class="dir">registry/</span>                  <span class="cmt"># Plugin registration + discovery</span>
+│   │   └── <span class="dir">adapter/</span>                   <span class="cmt"># Adapters: Copilot, Claude, MCP</span>
+│   │
+│   ├── <span class="dir">governance/</span>                    <span class="cmt"># ARIA integration (client only)</span>
+│   │   ├── <span class="dir">client/</span>                    <span class="cmt"># ARIA REST client</span>
+│   │   ├── <span class="dir">reporter/</span>                  <span class="cmt"># Async execution reporter → ARIA</span>
+│   │   └── <span class="dir">context/</span>                   <span class="cmt"># ARIA context injection</span>
+│   │
+│   ├── <span class="dir">audit/</span>                         <span class="cmt"># Audit logger</span>
+│   │   ├── <span class="dir">logger/</span>                    <span class="cmt"># Tool calls + payloads + results</span>
+│   │   └── <span class="dir">model/</span>                     <span class="cmt"># AuditEvent, AuditLog entities</span>
+│   │
+│   ├── <span class="dir">observability/</span>                 <span class="cmt"># OpenTelemetry + metrics</span>
+│   │   ├── <span class="dir">tracing/</span>                   <span class="cmt"># Span management + trace ID</span>
+│   │   └── <span class="dir">metrics/</span>                   <span class="cmt"># Prometheus metrics</span>
+│   │
+│   ├── <span class="dir">config/</span>                        <span class="cmt"># Spring configuration classes</span>
+│   ├── <span class="dir">exception/</span>                     <span class="cmt"># Global exception handling</span>
+│   ├── <span class="dir">model/</span>                         <span class="cmt"># Shared DTOs and domain models</span>
+│   └── <span class="dir">AcesPlatformApplication.java</span>   <span class="cmt"># Main class</span>
+│
+├── <span class="dir">src/main/resources/</span>
+│   ├── application.yml                <span class="cmt"># Base config</span>
+│   ├── application-local.yml          <span class="cmt"># Local dev overrides</span>
+│   ├── application-dev.yml            <span class="cmt"># Dev env config</span>
+│   └── <span class="dir">db/migration/</span>              <span class="cmt"># Flyway Oracle migrations</span>
+│
+├── <span class="dir">src/test/java/com/jpmc/aces/</span>      <span class="cmt"># Mirror of main structure</span>
+│
+├── docker-compose.yml                 <span class="cmt"># Redis + Qdrant + Elasticsearch local</span>
+├── pom.xml                            <span class="cmt"># All Phase 1 dependencies locked</span>
+└── README.md                          <span class="cmt"># Setup guide</span></div>
+    </div>
+  </div>
+
+  <!-- KEY ARCHITECTURE DECISIONS -->
+  <div class="section">
+    <span class="section-tag tag-blue">DAY 2 DELIVERABLE</span>
+    <div class="section-title">5 Architecture Decisions to Lock on Day 2</div>
+    <div class="section-sub">These decisions cannot be undone cheaply once Sprint 1 starts. Lock them on Day 2. Write them down. Commit them to the repo wiki.</div>
+
+    <div class="decision-list">
+      <div class="decision">
+        <div class="dec-icon">🏗</div>
+        <div>
+          <div class="dec-title">Decision 1: Project Structure — Modular Monolith (NOT microservices)</div>
+          <div class="dec-text">Start as a modular monolith. One Spring Boot app, multiple internal modules with strict package boundaries. Extract to microservices in Phase 3 only if needed. Microservices on Day 1 = operational overhead that kills a small team.</div>
+          <div class="dec-answer" style="background:rgba(0,229,122,0.08);color:var(--green);">✓ RECOMMENDED: Modular monolith → Phase 3 extraction if justified</div>
+        </div>
+      </div>
+      <div class="decision">
+        <div class="dec-icon">📚</div>
+        <div>
+          <div class="dec-title">Decision 2: AI Framework — LangChain4j (not Spring AI)</div>
+          <div class="dec-text">LangChain4j has native MCP tool support, better agent loop abstractions, and more active Java AI community. Spring AI is cleaner but thinner. For ACES specifically, LangChain4j wins on MCP integration depth.</div>
+          <div class="dec-answer" style="background:rgba(0,229,122,0.08);color:var(--green);">✓ RECOMMENDED: LangChain4j 0.35+ with MCP tool provider</div>
+        </div>
+      </div>
+      <div class="decision">
+        <div class="dec-icon">🗄</div>
+        <div>
+          <div class="dec-title">Decision 3: Database — Oracle ADB with Flyway migrations</div>
+          <div class="dec-text">Oracle Autonomous Database with wallet-based connection. Flyway for schema migrations — every DDL change is versioned and reproducible. HikariCP for connection pooling. No ORM for complex queries — use JDBC templates for performance-critical paths.</div>
+          <div class="dec-answer" style="background:rgba(0,229,122,0.08);color:var(--green);">✓ RECOMMENDED: Oracle ADB + Flyway + HikariCP + Spring Data JPA for simple + JdbcTemplate for complex</div>
+        </div>
+      </div>
+      <div class="decision">
+        <div class="dec-icon">🌿</div>
+        <div>
+          <div class="dec-title">Decision 4: Git Strategy — Trunk-based development</div>
+          <div class="dec-text">Feature branches live max 2 days. PR required before merge to main. One reviewer minimum. No long-lived feature branches. Main is always deployable. This forces small, reviewable commits and prevents integration hell.</div>
+          <div class="dec-answer" style="background:rgba(0,229,122,0.08);color:var(--green);">✓ RECOMMENDED: Trunk-based + feature flags for incomplete features</div>
+        </div>
+      </div>
+      <div class="decision">
+        <div class="dec-icon">📦</div>
+        <div>
+          <div class="dec-title">Decision 5: Package naming convention</div>
+          <div class="dec-text">com.jpmc.aces.{module}.{submodule} — strict. No exceptions. The package name tells you exactly which architectural layer the class belongs to. If you cannot tell from the package name, it is in the wrong package.</div>
+          <div class="dec-answer" style="background:rgba(0,229,122,0.08);color:var(--green);">✓ LOCKED: com.jpmc.aces.core.orchestrator, com.jpmc.aces.mcp.auth, etc.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOCKER COMPOSE -->
+  <div class="section">
+    <span class="section-tag tag-green">DAY 3 DELIVERABLE</span>
+    <div class="section-title">Local Dev docker-compose.yml</div>
+    <div class="section-sub">Every engineer runs this on Day 3. No excuses. If it does not run on a machine — fix the compose file before moving on.</div>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+      <div class="code-block"><span class="kw">version</span>: <span class="str">'3.9'</span>
+
+<span class="kw">services</span>:
+
+  <span class="kw">redis</span>:
+    image: <span class="str">redis:7.2-alpine</span>
+    ports: [<span class="str">"6379:6379"</span>]
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: [<span class="str">"CMD"</span>, <span class="str">"redis-cli"</span>, <span class="str">"ping"</span>]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  <span class="kw">qdrant</span>:
+    image: <span class="str">qdrant/qdrant:v1.9.0</span>
+    ports: [<span class="str">"6333:6333"</span>, <span class="str">"6334:6334"</span>]
+    volumes: [<span class="str">"./data/qdrant:/qdrant/storage"</span>]
+    healthcheck:
+      test: [<span class="str">"CMD"</span>, <span class="str">"curl"</span>, <span class="str">"-f"</span>, <span class="str">"http://localhost:6333/healthz"</span>]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  <span class="kw">elasticsearch</span>:
+    image: <span class="str">elasticsearch:8.13.0</span>
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports: [<span class="str">"9200:9200"</span>]
+    volumes: [<span class="str">"./data/elasticsearch:/usr/share/elasticsearch/data"</span>]
+    healthcheck:
+      test: [<span class="str">"CMD"</span>, <span class="str">"curl"</span>, <span class="str">"-f"</span>, <span class="str">"http://localhost:9200/_cluster/health"</span>]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  <span class="kw">minio</span>:
+    image: <span class="str">minio/minio:latest</span>
+    command: server /data --console-address ":9001"
+    ports: [<span class="str">"9000:9000"</span>, <span class="str">"9001:9001"</span>]
+    environment:
+      MINIO_ROOT_USER: <span class="str">aceslocaluser</span>
+      MINIO_ROOT_PASSWORD: <span class="str">acesl0calpass</span>
+    volumes: [<span class="str">"./data/minio:/data"</span>]
+
+<span class="cmt"># Note: Oracle ADB uses cloud wallet — no local Docker container
+# Use Oracle Always-Free ADB instance for local dev
+# Wallet files go in src/main/resources/wallet/</span></div>
+    </div>
+  </div>
+
+  <!-- SPRINT 1 TICKETS -->
+  <div class="section">
+    <span class="section-tag tag-purple">DAY 5 DELIVERABLE</span>
+    <div class="section-title">Sprint 1 Tickets — Pre-Written</div>
+    <div class="section-sub">These are the exact tickets to create on Day 5. Every ticket has an ID, description, owner role, and done definition. Do not start Sprint 1 until every ticket is in your board with an assigned engineer.</div>
+
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Ticket ID</th>
+          <th>Title</th>
+          <th>Owner Role</th>
+          <th>Done When</th>
+          <th>Blocks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-001</td>
+          <td>Oracle ADB — ACES schema DDL + Flyway baseline</td>
+          <td><span class="task-owner owner-data" style="margin:0;">DATA ENG</span></td>
+          <td>All tables created, Flyway migration runs clean</td>
+          <td>ACES-005, 006</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-002</td>
+          <td>Spring Boot project scaffold + package structure committed</td>
+          <td><span class="task-owner owner-be" style="margin:0;">ACES BE LEAD</span></td>
+          <td>mvn clean install passes on all machines</td>
+          <td>All tickets</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-003</td>
+          <td>Docker Compose — Redis + Qdrant + Elasticsearch local</td>
+          <td><span class="task-owner owner-devops" style="margin:0;">DEVOPS</span></td>
+          <td>All 3 services healthy on every dev machine</td>
+          <td>ACES-008, 009</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-004</td>
+          <td>Auth Middleware — OAuth 2.1 + JWT + JWKS filter chain</td>
+          <td><span class="task-owner owner-be" style="margin:0;">ACES BE LEAD</span></td>
+          <td>Valid JWT passes. Invalid JWT returns 401. Test written.</td>
+          <td>ACES-010</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-005</td>
+          <td>Tenant Guard — TenantContext + Oracle VPD integration</td>
+          <td><span class="task-owner owner-devops" style="margin:0;">DEVOPS</span></td>
+          <td>Every DB query scoped to tenant_id. Cross-tenant query blocked.</td>
+          <td>ACES-006, 007</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-006</td>
+          <td>Tool Registry — Oracle catalog + versioned tool registration API</td>
+          <td><span class="task-owner owner-be" style="margin:0;">BE INTEGRATION</span></td>
+          <td>POST /tools registers tool. GET /tools/{id} returns it. Semver validated.</td>
+          <td>ACES-010</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-007</td>
+          <td>Rate Limiter — Redis token bucket per tenant per tool</td>
+          <td><span class="task-owner owner-be" style="margin:0;">ACES BE LEAD</span></td>
+          <td>Requests above limit return 429. Bucket refills at configured rate.</td>
+          <td>ACES-010</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-008</td>
+          <td>Cache Manager — L1 in-process + L2 Redis</td>
+          <td><span class="task-owner owner-be" style="margin:0;">ACES BE LEAD</span></td>
+          <td>Cache hit skips downstream call. L2 Redis confirmed with TTL. Test written.</td>
+          <td>ACES-010</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-009</td>
+          <td>Circuit Breaker — Resilience4j per downstream tool</td>
+          <td><span class="task-owner owner-be" style="margin:0;">ACES BE LEAD</span></td>
+          <td>Breaker opens after 5 failures. Returns fallback. Closes after threshold.</td>
+          <td>ACES-010</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-010</td>
+          <td>Tool Execution Engine — atomic tool call end-to-end</td>
+          <td><span class="task-owner owner-be" style="margin:0;">ACES BE LEAD</span></td>
+          <td>One tool call flows through auth → rate limiter → cache → circuit breaker → execute → audit log.</td>
+          <td>ACES-011</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-011</td>
+          <td>Audit Logger — Oracle append-only tool call log</td>
+          <td><span class="task-owner owner-data" style="margin:0;">DATA ENG</span></td>
+          <td>Every tool call logged with timestamp, tool, tenant, payload hash, result hash, duration.</td>
+          <td>ACES-012</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-012</td>
+          <td>ARIA Reporter — async execution record publisher</td>
+          <td><span class="task-owner owner-be" style="margin:0;">ACES BE LEAD</span></td>
+          <td>Execution record posted to ARIA endpoint asynchronously. Non-blocking. Retry on failure.</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-013</td>
+          <td>Memory Service — STM (Redis) + LTM (Qdrant) skeleton</td>
+          <td><span class="task-owner owner-data" style="margin:0;">DATA ENG</span></td>
+          <td>Store and retrieve short-term context. Qdrant collection created. Basic vector upsert/search works.</td>
+          <td>ACES-014</td>
+        </tr>
+        <tr>
+          <td style="font-family:'DM Mono',monospace;color:var(--accent);">ACES-014</td>
+          <td>OpenTelemetry — trace spans across tool execution chain</td>
+          <td><span class="task-owner owner-devops" style="margin:0;">DEVOPS</span></td>
+          <td>One trace ID visible in Jaeger from API entry to tool execution to audit log.</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- NON-NEGOTIABLES -->
+  <div class="section">
+    <span class="section-tag tag-red">ARCHITECT MANDATE</span>
+    <div class="section-title">Non-Negotiables Before Sprint 1 Starts</div>
+
+    <div class="non-neg">
+      <div class="non-neg-title">THESE GATES MUST BE CLEARED — NO EXCEPTIONS</div>
+      <div class="nn-item"><span class="nn-num">1</span>Every engineer has read the team briefing document and can state their role in one sentence.</div>
+      <div class="nn-item"><span class="nn-num">2</span>The 5 architecture decisions from Day 2 are written down, agreed, and committed to the repo wiki. No undecided decisions entering Sprint 1.</div>
+      <div class="nn-item"><span class="nn-num">3</span>mvn clean install passes on every engineer's local machine with the scaffold committed on Day 4.</div>
+      <div class="nn-item"><span class="nn-num">4</span>Every Sprint 1 ticket has exactly one owner. No ticket is unassigned. No engineer has zero tickets.</div>
+      <div class="nn-item"><span class="nn-num">5</span>Every engineer knows the answer to: "Where does the ARIA Reporter live in the package structure?" Answer: com.jpmc.aces.governance.reporter</div>
+      <div class="nn-item"><span class="nn-num">6</span>Daily standup time is agreed and in everyone's calendar before end of Day 5.</div>
+      <div class="nn-item"><span class="nn-num">7</span>The Docker Compose file runs clean on every machine. All 3 services (Redis, Qdrant, Elasticsearch) return healthy.</div>
+    </div>
+  </div>
+
+  <!-- WHAT COMES NEXT -->
+  <div class="section">
+    <span class="section-tag tag-amber">NEXT</span>
+    <div class="section-title">After Week 0 — What Happens on Sprint 1 Day 1</div>
+    <div class="section-sub">Sprint 1 Day 1 is not planning. Planning happened on Week 0 Day 5. Sprint 1 Day 1 is coding. Every engineer opens their first ticket and starts work.</div>
+
+    <div class="alert alert-amber">
+      <div class="alert-title">SPRINT 1 DAY 1 MORNING STANDUP — THE ONLY AGENDA ITEM</div>
+      <div class="alert-text">Each engineer says: "I am working on ACES-{num}. My first commit will be [specific thing]. I expect to be done by [day]." That is it. No retrospective. No re-planning. Build.</div>
+    </div>
+
+    <div class="alert alert-blue">
+      <div class="alert-title">THE FIRST COMMIT RULE</div>
+      <div class="alert-text">Every engineer must make their first commit by end of Sprint 1 Day 1. Even if it is a skeleton class with a TODO. A commit proves the environment works and the engineer is unblocked. No first commit by end of Day 1 = blocker that Santosh resolves immediately.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function copyCode(btn) {
+  const block = btn.nextElementSibling;
+  navigator.clipboard.writeText(block.innerText).then(() => {
+    btn.textContent = 'COPIED!';
+    setTimeout(() => btn.textContent = 'COPY', 1500);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ACES — Innovation Week Demo + Auto-Fix Flow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090f;--s:#0b0f1a;--card:#0f1520;--border:#1a2535;
+  --amber:#f59e0b;--blue:#38bdf8;--green:#34d399;
+  --red:#f87171;--purple:#a78bfa;--oracle:#fb923c;--teal:#2dd4bf;
+  --text:#e2eaf5;--muted:#4a6080;--dim:#1a2535;
+  --font:'Space Grotesk',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);}
+
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(7,9,15,0.95);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);display:flex;align-items:center;
+  padding:0 20px;height:48px;gap:2px;overflow-x:auto;
+}
+.nav-brand{display:flex;align-items:center;gap:8px;margin-right:20px;flex-shrink:0;}
+.nav-logo{width:26px;height:26px;border-radius:5px;background:linear-gradient(135deg,var(--amber),#b45309);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;font-family:var(--mono);}
+.nav-name{font-size:12px;font-weight:700;color:var(--amber);}
+.nb{padding:0 14px;height:48px;border:none;background:none;font-family:var(--font);font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.nb.active{color:var(--amber);border-bottom-color:var(--amber);}
+.nb:hover{color:var(--text);}
+
+.page{display:none;padding:24px 20px 60px;max-width:1300px;margin:0 auto;}
+.page.active{display:block;}
+
+.ph{margin-bottom:24px;}
+.ptag{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:2px;padding:3px 10px;border-radius:3px;margin-bottom:10px;}
+.ta{background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.3);}
+.tb{background:rgba(56,189,248,0.1);color:var(--blue);border:1px solid rgba(56,189,248,0.3);}
+.tg{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.3);}
+.tr{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.3);}
+.tp{background:rgba(167,139,250,0.1);color:var(--purple);border:1px solid rgba(167,139,250,0.3);}
+.ptitle{font-size:24px;font-weight:700;margin-bottom:4px;}
+.psub{font-size:13px;color:var(--muted);line-height:1.7;max-width:700px;}
+
+.dw{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.dt{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;font-weight:600;}
+
+/* Demo script */
+.demo-timeline{display:flex;flex-direction:column;gap:0;}
+.demo-step{display:flex;gap:0;position:relative;}
+.demo-left{display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;}
+.demo-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;z-index:2;}
+.demo-line{flex:1;width:2px;background:var(--border);}
+.demo-step:last-child .demo-line{display:none;}
+.demo-content{flex:1;background:var(--s);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-left:8px;margin-bottom:8px;}
+.demo-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.demo-time{font-family:var(--mono);font-size:9px;color:var(--muted);background:var(--dim);padding:2px 6px;border-radius:3px;}
+.demo-stage{font-size:12px;font-weight:700;}
+.demo-action{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:6px;}
+.demo-screen{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px 12px;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;}
+.demo-impact{margin-top:8px;padding:6px 10px;border-radius:4px;font-size:10px;display:inline-block;}
+
+/* Auto-fix flow */
+.af-flow{position:relative;}
+.af-pipeline{display:flex;align-items:stretch;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:16px;}
+.af-step{flex:1;padding:16px 12px;border-right:1px solid var(--border);position:relative;}
+.af-step:last-child{border-right:none;}
+.af-num{font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:5px;letter-spacing:1px;}
+.af-title{font-size:11px;font-weight:700;margin-bottom:4px;}
+.af-desc{font-size:9.5px;color:var(--muted);line-height:1.5;}
+.af-arrow{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#000;z-index:2;}
+
+/* Sequence */
+.seq-actors{display:flex;gap:0;}
+.seq-actor{flex:1;text-align:center;padding:10px 6px;border-radius:6px 6px 0 0;border:1px solid;border-bottom:none;font-size:10px;font-weight:700;min-width:100px;}
+.seq-body{border:1px solid var(--border);border-radius:0 0 8px 8px;padding:6px;background:var(--s);}
+.seq-row{display:flex;align-items:center;min-height:34px;border-bottom:1px solid var(--dim);font-size:10px;font-family:var(--mono);padding:4px 6px;gap:6px;}
+.seq-row:last-child{border:none;}
+.sf{min-width:110px;font-size:9.5px;}
+.sd{color:var(--blue);font-weight:700;flex-shrink:0;}
+.st{min-width:110px;font-size:9.5px;}
+.sm{flex:1;}
+.sdiv{text-align:center;font-style:italic;color:var(--muted);font-size:9.5px;padding:6px;background:var(--dim);border-radius:3px;margin:3px 0;}
+
+/* Use cases table */
+.uc-table{width:100%;border-collapse:collapse;font-size:11px;}
+.uc-table th{text-align:left;padding:9px 12px;background:var(--s);color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);}
+.uc-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.uc-table tr:last-child td{border:none;}
+
+/* Claude Code workflow */
+.cc-workflow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+.cc-card{background:var(--s);border:1px solid var(--border);border-radius:10px;padding:16px;border-top:3px solid;}
+.cc-day{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+.cc-title{font-size:13px;font-weight:700;margin-bottom:8px;}
+.cc-items{display:flex;flex-direction:column;gap:4px;}
+.cc-item{font-size:10px;color:var(--muted);display:flex;gap:6px;line-height:1.5;}
+.cc-item::before{content:'▸';flex-shrink:0;margin-top:1px;}
+
+/* Code block */
+.code{background:var(--s);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:var(--mono);font-size:10.5px;line-height:1.8;overflow-x:auto;color:var(--muted);white-space:pre;margin:10px 0;}
+.kw{color:var(--amber);}
+.str{color:var(--green);}
+.cmt{color:var(--dim);font-style:italic;}
+.cls{color:var(--blue);}
+.ann{color:var(--purple);}
+
+/* Callout */
+.callout{border-radius:8px;padding:16px;margin-bottom:14px;border-left:4px solid;}
+.ca{background:rgba(245,158,11,0.06);border-color:var(--amber);}
+.cb{background:rgba(56,189,248,0.06);border-color:var(--blue);}
+.cg{background:rgba(52,211,153,0.06);border-color:var(--green);}
+.cr{background:rgba(248,113,113,0.06);border-color:var(--red);}
+.callout-title{font-size:10px;font-weight:700;letter-spacing:1px;font-family:var(--mono);margin-bottom:6px;}
+.callout-text{font-size:12px;color:var(--muted);line-height:1.7;}
+
+/* SDD explanation */
+.sdd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.sdd-box{background:var(--s);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.sdd-title{font-size:12px;font-weight:700;margin-bottom:10px;}
+.sdd-items{display:flex;flex-direction:column;gap:6px;}
+.sdd-item{font-size:11px;color:var(--muted);display:flex;gap:8px;line-height:1.5;}
+.sdd-item .num{color:var(--amber);font-weight:700;flex-shrink:0;font-family:var(--mono);}
+
+.engineer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.eng-card{background:var(--s);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.eng-num{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+.eng-name{font-size:12px;font-weight:700;margin-bottom:3px;}
+.eng-module{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:8px;}
+.eng-items{display:flex;flex-direction:column;gap:3px;}
+.eng-item{font-size:10px;color:var(--muted);}
+.eng-item::before{content:'· ';}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">A</div>
+    <div class="nav-name">ACES COMPLETE</div>
+  </div>
+  <button class="nb active" onclick="show('sdd',this)">SDD Approach</button>
+  <button class="nb" onclick="show('autofix',this)">Auto-Fix Flow</button>
+  <button class="nb" onclick="show('demo',this)">Innovation Week Demo</button>
+  <button class="nb" onclick="show('claude-code',this)">Claude Code Setup</button>
+  <button class="nb" onclick="show('parallel',this)">Parallel Build Plan</button>
+</div>
+
+<!-- ══ SDD APPROACH ══ -->
+<div class="page active" id="pg-sdd">
+  <div class="ph">
+    <span class="ptag ta">SPEC-DRIVEN DEVELOPMENT WITH CLAUDE CODE</span>
+    <div class="ptitle">Yes — ACES CAN Be Built This Way</div>
+    <div class="psub">Your idea is correct. Each engineer gets a module spec. Claude Code generates the implementation. Engineer reviews and integrates. 6 modules in parallel in one week instead of 6 weeks sequentially.</div>
+  </div>
+
+  <div class="callout ca">
+    <div class="callout-title">THE INSIGHT YOU HAD</div>
+    <div class="callout-text">You are not asking ACES to build itself. You are asking: can we use Claude Code with CLAUDE.md instructions, skill files, and module specs to generate each ACES module — one per engineer — so we finish faster? The answer is YES. This is exactly how the best teams build with AI today. It cuts Phase 1 from 8 weeks to 10 days.</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">HOW IT WORKS — THREE INGREDIENTS</div>
+    <div class="sdd-grid">
+      <div class="sdd-box" style="border-top:3px solid var(--amber);">
+        <div class="sdd-title" style="color:var(--amber);">1. CLAUDE.md (Project Instructions)</div>
+        <div class="sdd-items">
+          <div class="sdd-item"><span class="num">→</span>Lives at project root. Claude Code reads it automatically before every generation.</div>
+          <div class="sdd-item"><span class="num">→</span>Defines: package conventions, Oracle 23ai connection, Spring AI setup, style rules, non-negotiables.</div>
+          <div class="sdd-item"><span class="num">→</span>Same mental model for ALL 6 engineers. Claude generates consistent code across all modules.</div>
+          <div class="sdd-item"><span class="num">→</span>Acts as the architectural guardrail — if Claude violates CLAUDE.md, the PR reviewer catches it.</div>
+        </div>
+      </div>
+      <div class="sdd-box" style="border-top:3px solid var(--blue);">
+        <div class="sdd-title" style="color:var(--blue);">2. Module Spec Files</div>
+        <div class="sdd-items">
+          <div class="sdd-item"><span class="num">→</span>One .md spec per module. Engineer 1 gets aces-mcp-spec.md. Engineer 2 gets aces-core-spec.md.</div>
+          <div class="sdd-item"><span class="num">→</span>Spec defines: classes to generate, methods, logic, Oracle tables, metrics, test cases.</div>
+          <div class="sdd-item"><span class="num">→</span>Engineer feeds spec to Claude Code. Claude generates ALL files in the module.</div>
+          <div class="sdd-item"><span class="num">→</span>Engineer reviews every line. Fixes issues. Raises PR. 4-6 hours instead of 2 weeks.</div>
+        </div>
+      </div>
+      <div class="sdd-box" style="border-top:3px solid var(--green);">
+        <div class="sdd-title" style="color:var(--green);">3. Skill Files</div>
+        <div class="sdd-items">
+          <div class="sdd-item"><span class="num">→</span>Reusable patterns Claude applies across all modules.</div>
+          <div class="sdd-item"><span class="num">→</span>oracle-vpd-pattern.md — correct Oracle VPD usage every time.</div>
+          <div class="sdd-item"><span class="num">→</span>spring-ai-agent-pattern.md — correct Spring AI wiring every time.</div>
+          <div class="sdd-item"><span class="num">→</span>No engineer writes boilerplate. Claude handles it consistently.</div>
+        </div>
+      </div>
+      <div class="sdd-box" style="border-top:3px solid var(--purple);">
+        <div class="sdd-title" style="color:var(--purple);">4. The Review Rule</div>
+        <div class="sdd-items">
+          <div class="sdd-item"><span class="num">→</span>AI generates. Engineer reviews EVERY LINE before committing.</div>
+          <div class="sdd-item"><span class="num">→</span>This is not vibe coding. The engineer must understand what was generated.</div>
+          <div class="sdd-item"><span class="num">→</span>PR review by second engineer: does it follow CLAUDE.md? Does it follow the spec?</div>
+          <div class="sdd-item"><span class="num">→</span>If engineer cannot explain a generated line — rewrite it or ask Claude to explain it.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">TRADITIONAL vs SDD WITH CLAUDE CODE</div>
+    <table class="uc-table">
+      <thead><tr><th>Aspect</th><th>Traditional (6 engineers, 8 weeks)</th><th>SDD with Claude Code (6 engineers, 10 days)</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600;">Module velocity</td><td style="color:var(--red);">1 module per engineer per 2 weeks</td><td style="color:var(--green);">1 module per engineer per 2-3 days</td></tr>
+        <tr><td style="font-weight:600;">Code consistency</td><td style="color:var(--red);">Varies — each engineer has different style</td><td style="color:var(--green);">Consistent — CLAUDE.md enforces same patterns</td></tr>
+        <tr><td style="font-weight:600;">Boilerplate</td><td style="color:var(--red);">Engineer writes all @Service, @WithSpan, etc.</td><td style="color:var(--green);">Claude generates all boilerplate correctly</td></tr>
+        <tr><td style="font-weight:600;">Test coverage</td><td style="color:var(--red);">Often skipped under deadline pressure</td><td style="color:var(--green);">Tests generated with implementation — always present</td></tr>
+        <tr><td style="font-weight:600;">Oracle patterns</td><td style="color:var(--red);">Each engineer may get VPD wrong</td><td style="color:var(--green);">Skill file ensures VPD applied correctly every time</td></tr>
+        <tr><td style="font-weight:600;">Innovation Week</td><td style="color:var(--red);">Only aces-mcp + demo UI in 4 weeks</td><td style="color:var(--green);">All 6 modules + auto-fix demo + integration in 4 weeks</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ AUTO-FIX FLOW ══ -->
+<div class="page" id="pg-autofix">
+  <div class="ph">
+    <span class="ptag tg">ACES AUTO-FIX USE CASE</span>
+    <div class="ptitle">CI/CD Signal → ARIA Governs → ACES Fixes → Pipeline Retriggers</div>
+    <div class="psub">Engineer does nothing except review a single commit. Snyk finds vulnerability. ACES reads it, generates the fix, commits it, retriggers the build. 45 minutes → 2 minutes.</div>
+  </div>
+
+  <div class="callout cg">
+    <div class="callout-title">IS THIS CORRECT?</div>
+    <div class="callout-text">Yes — exactly correct. This is ACES doing what ACES does. It is not a separate platform. It is a use case: Integration Layer receives Snyk webhook → ARIA evaluates risk → ACES agent generates fix → commits to PR branch → retriggers pipeline → notifies engineer. The engineer reviews one commit. That is all.</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">AUTO-FIX PIPELINE — END TO END</div>
+    <div class="af-pipeline">
+      <div class="af-step" style="background:rgba(248,113,113,0.04);">
+        <div class="af-num">STAGE 1</div>
+        <div class="af-title" style="color:var(--red);">Scanner Signal</div>
+        <div class="af-desc">Snyk / Sonar / Raven finds issue. Sends webhook to ACES Integration Layer. Normalised to ScanResultEvent.</div>
+        <div class="af-arrow" style="background:var(--red);">→</div>
+      </div>
+      <div class="af-step" style="background:rgba(245,158,11,0.04);">
+        <div class="af-num">STAGE 2</div>
+        <div class="af-title" style="color:var(--amber);">ARIA Risk Check</div>
+        <div class="af-desc">AutoFixRiskEvaluator checks: agent trust, file criticality, fix type. Returns ALLOW / WARN / BLOCK.</div>
+        <div class="af-arrow" style="background:var(--amber);">→</div>
+      </div>
+      <div class="af-step" style="background:rgba(248,113,113,0.04);">
+        <div class="af-num">STAGE 3</div>
+        <div class="af-title" style="color:var(--red);">BLOCK → Escalate</div>
+        <div class="af-desc">Auth/payment file? Agent trust too low? ARIA blocks auto-fix. Slack notification sent to engineer.</div>
+        <div class="af-arrow" style="background:var(--muted);">✕</div>
+      </div>
+      <div class="af-step" style="background:rgba(52,211,153,0.04);">
+        <div class="af-num">STAGE 4</div>
+        <div class="af-title" style="color:var(--green);">ALLOW → AutoFixAgent</div>
+        <div class="af-desc">AutoFixAgent reads file. Spring AI generates precise fix with reasoning. Validates output.</div>
+        <div class="af-arrow" style="background:var(--green);">→</div>
+      </div>
+      <div class="af-step" style="background:rgba(52,211,153,0.04);">
+        <div class="af-num">STAGE 5</div>
+        <div class="af-title" style="color:var(--green);">Commit + Notify</div>
+        <div class="af-desc">Fix committed to PR branch. PR comment added. Pipeline retriggered. Engineer gets Slack with reasoning.</div>
+        <div class="af-arrow" style="background:var(--green);">→</div>
+      </div>
+      <div class="af-step" style="background:rgba(56,189,248,0.04);">
+        <div class="af-num">STAGE 6</div>
+        <div class="af-title" style="color:var(--blue);">ARIA Records</div>
+        <div class="af-desc">ExecutionRecord → Oracle AQ → ARIA. Decision archaeology written. Trust score updated.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">AUTO-FIX SEQUENCE DIAGRAM</div>
+    <div class="seq-actors">
+      <div class="seq-actor" style="border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.06);color:var(--red);">Snyk / Sonar</div>
+      <div class="seq-actor" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.06);color:var(--amber);">ACES Webhook</div>
+      <div class="seq-actor" style="border-color:rgba(56,189,248,0.3);background:rgba(56,189,248,0.06);color:var(--blue);">ARIA</div>
+      <div class="seq-actor" style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.06);color:var(--green);">AutoFixAgent</div>
+      <div class="seq-actor" style="border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06);color:var(--purple);">Git / CI-CD</div>
+      <div class="seq-actor" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.06);color:var(--amber);">Engineer</div>
+    </div>
+    <div class="seq-body" id="autofix-seq"></div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">ARIA RISK RULES FOR AUTO-FIX</div>
+    <table class="uc-table">
+      <thead><tr><th>Condition</th><th>ARIA Decision</th><th>What Happens</th></tr></thead>
+      <tbody>
+        <tr><td>Auth / security / payment file affected</td><td style="color:var(--red);font-weight:700;">BLOCK</td><td>No auto-fix. Engineer notified manually. JIRA ticket created.</td></tr>
+        <tr><td>Agent trust score &lt; 0.50</td><td style="color:var(--red);font-weight:700;">BLOCK</td><td>Agent not trusted enough. Human review required.</td></tr>
+        <tr><td>Dependency version bump (e.g. log4j)</td><td style="color:var(--green);font-weight:700;">ALLOW</td><td>Auto-fix proceeds. Engineer notified after commit.</td></tr>
+        <tr><td>Code smell, low severity bug</td><td style="color:var(--green);font-weight:700;">ALLOW</td><td>Auto-fix proceeds. Engineer notified after commit.</td></tr>
+        <tr><td>Security hotspot, HIGH severity</td><td style="color:var(--amber);font-weight:700;">ALLOW + WARN</td><td>Auto-fix proceeds. Engineer MUST review before merging.</td></tr>
+        <tr><td>CRITICAL security issue, production scope</td><td style="color:var(--amber);font-weight:700;">REQUIRES APPROVAL</td><td>Fix generated but not committed until engineering lead approves.</td></tr>
+        <tr><td>File &gt; 500KB or binary file</td><td style="color:var(--red);font-weight:700;">BLOCK</td><td>Too risky for auto-fix. Manual required.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="dw">
+    <div class="dt">SUPPORTED SCANNERS — PLUGGABLE VIA INTEGRATION LAYER</div>
+    <table class="uc-table">
+      <thead><tr><th>Scanner</th><th>Issue Types</th><th>Auto-Fix Action</th><th>Phase</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:700;color:var(--red);">Snyk</td><td>Vulnerable dependency</td><td>Upgrade version in pom.xml / package.json</td><td style="color:var(--amber);">P1</td></tr>
+        <tr><td style="font-weight:700;color:var(--red);">Snyk</td><td>Vulnerable code pattern</td><td>Generate patched code with Spring AI</td><td style="color:var(--amber);">P1</td></tr>
+        <tr><td style="font-weight:700;color:var(--blue);">SonarQube</td><td>Code smell / duplication</td><td>Refactor affected method</td><td style="color:var(--amber);">P1</td></tr>
+        <tr><td style="font-weight:700;color:var(--blue);">SonarQube</td><td>Bug detected</td><td>Generate targeted fix</td><td style="color:var(--amber);">P1</td></tr>
+        <tr><td style="font-weight:700;color:var(--blue);">SonarQube</td><td>Security hotspot</td><td>Apply security fix pattern</td><td style="color:var(--blue);">P2</td></tr>
+        <tr><td style="font-weight:700;color:var(--purple);">Raven (internal)</td><td>Compliance violation</td><td>Apply JPMC compliance pattern</td><td style="color:var(--amber);">P1</td></tr>
+        <tr><td style="font-weight:700;color:var(--muted);">Any Scanner</td><td>Any finding</td><td>New scanners register as integration/scanner plugins</td><td style="color:var(--blue);">P2</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ INNOVATION WEEK DEMO ══ -->
+<div class="page" id="pg-demo">
+  <div class="ph">
+    <span class="ptag ta">INNOVATION WEEK DEMO SCRIPT</span>
+    <div class="ptitle">The 8-Minute Demo That Wins</div>
+    <div class="psub">Two scenarios. One for engineers. One for management. Both running live with real Claude API calls. No slides during the demo — everything runs in the browser.</div>
+  </div>
+
+  <div class="callout ca">
+    <div class="callout-title">THE DEMO STRATEGY</div>
+    <div class="callout-text">Open with the problem (30 seconds). Show Scenario 1 — ARIA blocks a bad agent (2 minutes). Show Scenario 2 — ACES auto-fixes a Snyk vulnerability (3 minutes). Show the archaeology and trust score update (1 minute). Show the management dashboard cost + risk view (1 minute). Close with the roadmap (30 seconds). Total: 8 minutes. Maximum impact.</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">DEMO TIMELINE — MINUTE BY MINUTE</div>
+    <div class="demo-timeline" id="demo-tl"></div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">WHAT YOU NEED RUNNING BEFORE THE DEMO</div>
+    <table class="uc-table">
+      <thead><tr><th>Component</th><th>Status Needed</th><th>How to Verify</th></tr></thead>
+      <tbody>
+        <tr><td>ACES Spring Boot app</td><td style="color:var(--green);">Running on localhost:8080</td><td>GET /actuator/health → {"status":"UP"}</td></tr>
+        <tr><td>Oracle 23ai dev instance</td><td style="color:var(--green);">Connected and seeded</td><td>3 agents in ACES_PLUGINS, 2 tools in ACES_TOOL_REGISTRY</td></tr>
+        <tr><td>ARIA demo instance</td><td style="color:var(--green);">Running with demo agent profiles</td><td>mcp-infra-v1 has trustScore 0.29, claude-dev-v1 has 0.91</td></tr>
+        <tr><td>Claude API key</td><td style="color:var(--green);">In Vault or env var</td><td>curl test to Anthropic returns 200</td></tr>
+        <tr><td>ACES Demo Dashboard</td><td style="color:var(--green);">Open in browser</td><td>Agent trust registry visible</td></tr>
+        <tr><td>Slack demo channel</td><td style="color:var(--green);">#aces-demo-notifications</td><td>Slack bot connected and posting</td></tr>
+        <tr><td>Demo Snyk webhook</td><td style="color:var(--green);">Ready to fire</td><td>curl script prepared to send mock Snyk payload</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ CLAUDE CODE SETUP ══ -->
+<div class="page" id="pg-claude-code">
+  <div class="ph">
+    <span class="ptag tp">CLAUDE CODE SETUP</span>
+    <div class="ptitle">Files Every Engineer Needs</div>
+    <div class="psub">Drop these files into the project root. Every engineer's Claude Code instance reads CLAUDE.md automatically. Skill files are referenced in module specs.</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">PROJECT STRUCTURE WITH CLAUDE CODE FILES</div>
+    <div class="code">aces-platform/
+├── <span class="kw">CLAUDE.md</span>                     <span class="cmt"># Master instructions — Claude reads this first, always</span>
+├── <span class="kw">.claude/</span>
+│   └── <span class="kw">commands.md</span>               <span class="cmt"># /generate-service, /generate-adapter, /review-module etc</span>
+├── <span class="kw">specs/</span>                        <span class="cmt"># One spec file per module — engineer feeds to Claude</span>
+│   ├── aces-mcp-spec.md
+│   ├── aces-core-spec.md
+│   ├── aces-runtime-spec.md
+│   ├── aces-api-spec.md
+│   ├── aces-common-spec.md
+│   ├── aces-devops-spec.md
+│   └── <span class="kw">autofix-usecase-spec.md</span>   <span class="cmt"># The auto-fix use case spec</span>
+├── <span class="kw">skills/</span>                       <span class="cmt"># Reusable patterns Claude applies across all modules</span>
+│   ├── oracle-vpd-pattern.md     <span class="cmt"># VPD context, no WHERE tenant_id</span>
+│   ├── spring-ai-agent-pattern.md <span class="cmt"># ChatClient, tool calling, agentReasoning</span>
+│   ├── resilience4j-pattern.md   <span class="cmt"># Circuit breaker, retry config</span>
+│   └── aria-integration-pattern.md <span class="cmt"># How to call ARIA before/after execution</span>
+├── aces-common/
+├── aces-api/
+├── aces-core/
+├── aces-mcp/
+├── aces-runtime/
+├── aces-governance/
+└── aces-observability/</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">HOW EACH ENGINEER USES CLAUDE CODE</div>
+    <div class="code"><span class="cmt"># Step 1: Engineer opens Claude Code in their module directory</span>
+cd aces-platform/aces-mcp
+
+<span class="cmt"># Step 2: Claude Code reads CLAUDE.md automatically from project root</span>
+<span class="cmt"># No manual setup needed</span>
+
+<span class="cmt"># Step 3: Engineer says to Claude Code:</span>
+<span class="str">"Read specs/aces-mcp-spec.md and generate the complete module.
+Follow CLAUDE.md exactly. Use skills/oracle-vpd-pattern.md for
+all Oracle interactions. Generate all classes, tests, and configs."</span>
+
+<span class="cmt"># Step 4: Claude generates all files</span>
+<span class="cmt"># Engineer reviews every line — understands each before committing</span>
+
+<span class="cmt"># Step 5: Run the review command</span>
+<span class="str">"/review-module aces-mcp"</span>
+<span class="cmt"># Claude checks for CLAUDE.md violations</span>
+
+<span class="cmt"># Step 6: Run tests</span>
+mvn test -pl aces-mcp
+
+<span class="cmt"># Step 7: Raise PR</span>
+git checkout -b feature/ACES-001-aces-mcp
+git commit -m "feat(aces-mcp): generate MCP control pipeline from spec"
+git push origin feature/ACES-001-aces-mcp</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">THE ARIA INTEGRATION PATTERN SKILL FILE</div>
+    <div class="code"><span class="cmt"># skills/aria-integration-pattern.md</span>
+<span class="cmt"># Claude applies this to every class that executes agents</span>
+
+<span class="kw">BEFORE execution — always check ARIA:</span>
+<span class="cls">AriaDecision</span> decision = ariaClient.decide(<span class="cls">AriaRequest</span>.builder()
+    .agentId(request.agentId())
+    .taskType(request.taskType())
+    .environment(request.constraints().environment())
+    .filesInScope(request.context().filesInScope())
+    .build());
+
+<span class="kw">if</span> (decision.isBlock()) {
+    auditLogger.logBlock(request, decision);
+    <span class="kw">throw new</span> <span class="cls">AcesBlockedException</span>(decision.reason(), decision.archaeologyUrl());
+}
+
+<span class="kw">if</span> (decision.requiresApproval()) {
+    approvalGateService.createApprovalRequest(request, decision);
+    <span class="kw">throw new</span> <span class="cls">AcesPendingApprovalException</span>(decision.approvalTicketId());
+}
+
+<span class="cmt">// Inject ARIA context into request before calling agent</span>
+<span class="cls">AgentRequest</span> governedRequest = request.withAriaContext(
+    <span class="cls">AriaContext</span>.from(decision)
+);
+
+<span class="kw">AFTER execution — always report to ARIA:</span>
+ariaReporter.reportAsync(<span class="cls">ExecutionRecord</span>.builder()
+    .executionId(request.executionId())
+    .agentId(request.agentId())
+    .tenantId(<span class="cls">TenantContextHolder</span>.getTenantId())
+    .agentReasoning(response.agentReasoning()) <span class="cmt">// NEVER null</span>
+    .tokenCount(response.tokenCount())
+    .status(response.status())
+    .durationMs(response.durationMs())
+    .build());</div>
+  </div>
+</div>
+
+<!-- ══ PARALLEL BUILD PLAN ══ -->
+<div class="page" id="pg-parallel">
+  <div class="ph">
+    <span class="ptag tg">PARALLEL BUILD PLAN</span>
+    <div class="ptitle">6 Engineers · 6 Modules · 10 Days to Innovation Week</div>
+    <div class="psub">Everyone works in parallel from Day 3 onwards. Day 1-2 is alignment and setup. Day 3-7 is parallel generation and review. Day 8-10 is integration and demo prep.</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">ENGINEER ASSIGNMENTS</div>
+    <div class="engineer-grid">
+      <div class="eng-card" style="border-top:3px solid var(--red);">
+        <div class="eng-num">ENGINEER 1</div>
+        <div class="eng-name">MCP Control Pipeline</div>
+        <div class="eng-module">aces-mcp</div>
+        <div class="eng-items">
+          <div class="eng-item">JWT Auth Filter</div>
+          <div class="eng-item">Tenant Guard + Oracle VPD</div>
+          <div class="eng-item">Policy Evaluation Service</div>
+          <div class="eng-item">Rate Limiter (token bucket)</div>
+          <div class="eng-item">Circuit Breaker (Resilience4j)</div>
+          <div class="eng-item">Tool Execution Engine</div>
+          <div class="eng-item">Audit Logger (Oracle append-only)</div>
+        </div>
+      </div>
+      <div class="eng-card" style="border-top:3px solid var(--amber);">
+        <div class="eng-num">ENGINEER 2</div>
+        <div class="eng-name">Agentic Orchestration</div>
+        <div class="eng-module">aces-core</div>
+        <div class="eng-items">
+          <div class="eng-item">Planner Service</div>
+          <div class="eng-item">Orchestrator (1 revise loop)</div>
+          <div class="eng-item">Retriever (max 6 iterations)</div>
+          <div class="eng-item">Synthesizer (Spring AI)</div>
+          <div class="eng-item">Critic (APPROVE/REVISE)</div>
+          <div class="eng-item">Memory (Oracle Vector Search)</div>
+          <div class="eng-item">AutoFix Orchestrator</div>
+        </div>
+      </div>
+      <div class="eng-card" style="border-top:3px solid var(--green);">
+        <div class="eng-num">ENGINEER 3</div>
+        <div class="eng-name">Agent Runtime</div>
+        <div class="eng-module">aces-runtime</div>
+        <div class="eng-items">
+          <div class="eng-item">Agent Plugin Registry</div>
+          <div class="eng-item">Execution Router</div>
+          <div class="eng-item">ARIA Context Injector</div>
+          <div class="eng-item">Agent Execution Service</div>
+          <div class="eng-item">ARIA Reporter (Oracle AQ)</div>
+          <div class="eng-item">Claude Agent Adapter</div>
+          <div class="eng-item">Copilot Agent Adapter</div>
+        </div>
+      </div>
+      <div class="eng-card" style="border-top:3px solid var(--blue);">
+        <div class="eng-num">ENGINEER 4</div>
+        <div class="eng-name">API + Governance Client</div>
+        <div class="eng-module">aces-api + aces-governance</div>
+        <div class="eng-items">
+          <div class="eng-item">REST Controllers (all endpoints)</div>
+          <div class="eng-item">Webhook Controller (Snyk/Sonar)</div>
+          <div class="eng-item">Security Config (OAuth2)</div>
+          <div class="eng-item">Global Exception Handler</div>
+          <div class="eng-item">ARIA REST Client</div>
+          <div class="eng-item">Oracle AQ Config</div>
+          <div class="eng-item">Approval Gate Service</div>
+        </div>
+      </div>
+      <div class="eng-card" style="border-top:3px solid var(--purple);">
+        <div class="eng-num">ENGINEER 5 (Data)</div>
+        <div class="eng-name">Common + Oracle Schema</div>
+        <div class="eng-module">aces-common + Flyway</div>
+        <div class="eng-items">
+          <div class="eng-item">AgentPlugin interface</div>
+          <div class="eng-item">All domain records</div>
+          <div class="eng-item">All exception classes</div>
+          <div class="eng-item">V1–V9 Flyway migrations</div>
+          <div class="eng-item">Oracle VPD setup SQL</div>
+          <div class="eng-item">Oracle Vector Search DDL</div>
+          <div class="eng-item">Oracle AQ queue setup</div>
+        </div>
+      </div>
+      <div class="eng-card" style="border-top:3px solid var(--teal);">
+        <div class="eng-num">ENGINEER 6 (DevOps)</div>
+        <div class="eng-name">Scaffold + CI/CD</div>
+        <div class="eng-module">root pom + config + pipeline</div>
+        <div class="eng-items">
+          <div class="eng-item">Parent pom.xml (all deps locked)</div>
+          <div class="eng-item">application.yml (all profiles)</div>
+          <div class="eng-item">GitHub Actions CI pipeline</div>
+          <div class="eng-item">Developer setup script</div>
+          <div class="eng-item">Vault secret structure</div>
+          <div class="eng-item">DBA request checklist</div>
+          <div class="eng-item">Innovation Week demo setup</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">10-DAY TIMELINE TO INNOVATION WEEK DEMO</div>
+    <table class="uc-table">
+      <thead><tr><th>Day</th><th>Activity</th><th>All 6 Engineers</th><th>Done When</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--amber);font-weight:700;">Day 1</td><td>Architecture alignment</td><td>Read CLAUDE.md together. "Which layer?" quiz. Golden rules read-aloud.</td><td>Every engineer can state their module in one sentence</td></tr>
+        <tr><td style="color:var(--amber);font-weight:700;">Day 2</td><td>Environment + scaffold</td><td>Engineer 6 commits scaffold + CLAUDE.md. All engineers clone and build. DBA request sent.</td><td>mvn clean install passes on all machines</td></tr>
+        <tr><td style="color:var(--green);font-weight:700;">Day 3–4</td><td>Parallel generation</td><td>Each engineer feeds their spec to Claude Code. Reviews generated code. Raises PR.</td><td>All 6 module PRs raised</td></tr>
+        <tr><td style="color:var(--green);font-weight:700;">Day 5</td><td>PR reviews + merge</td><td>Cross-review: Engineer 1 reviews Engineer 2's PR etc. /review-module checks run.</td><td>All 6 modules merged in dependency order</td></tr>
+        <tr><td style="color:var(--blue);font-weight:700;">Day 6</td><td>Integration</td><td>Full stack: Engineer 4 runs end-to-end test. First real ARIA → ACES call. Fix integration issues.</td><td>POST /execute returns 200 with real agent response</td></tr>
+        <tr><td style="color:var(--blue);font-weight:700;">Day 7</td><td>Auto-fix demo</td><td>Engineer 1+2 wire AutoFixAgent. Test Snyk webhook → ACES → fix committed → pipeline retriggers.</td><td>Live Snyk → ACES auto-fix working end-to-end</td></tr>
+        <tr><td style="color:var(--purple);font-weight:700;">Day 8</td><td>Demo polish</td><td>Seed demo data: 3 agents with different trust scores. Load demo tool registry. Test both scenarios.</td><td>Both demo scenarios run clean 3 times in a row</td></tr>
+        <tr><td style="color:var(--purple);font-weight:700;">Day 9</td><td>Dress rehearsal</td><td>Full 8-minute demo run with all team watching. Fix any issues.</td><td>Demo runs clean. All backup plans ready.</td></tr>
+        <tr><td style="color:var(--amber);font-weight:700;">Day 10</td><td>Innovation Week</td><td>Present. Show live demo. Answer questions. Refer to architecture diagrams.</td><td>Standing ovation (optional but expected)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Auto-fix sequence
+const afSeq = [
+  {from:'Snyk',dir:'→',to:'ACES Webhook',msg:'POST /api/v1/webhooks/snyk  {CVE-2024-1234, log4j-core:2.14.1, PR-4821}'},
+  {from:'ACES Webhook',dir:'→',to:'ACES Webhook',msg:'Validate Snyk HMAC signature. Map payload → ScanResultEvent.'},
+  {from:'ACES Webhook',dir:'→',to:'ARIA',msg:'AutoFixRiskEvaluator.evaluate(event)  agent=autofix-v1, file=pom.xml, type=VULNERABILITY'},
+  {from:'ARIA',dir:'←',to:'ACES Webhook',msg:'{decision: ALLOW_WITH_WARNING, trustScore: 0.82, reason: "Dependency bump — low risk"}'},
+  {from:'ACES Webhook',dir:'→',to:'AutoFixAgent',msg:'execute(AgentRequest{task: FIX_VULNERABILITY, ariaContext{trustScore:0.82}})'},
+  {from:'AutoFixAgent',dir:'→',to:'Git / CI-CD',msg:'Fetch pom.xml content from PR-4821 branch'},
+  {from:'Git / CI-CD',dir:'←',to:'AutoFixAgent',msg:'pom.xml content (contains log4j-core:2.14.1)'},
+  {from:'AutoFixAgent',dir:'→',to:'AutoFixAgent',msg:'Spring AI prompt: "Fix CVE-2024-1234 in this pom.xml. Change log4j-core to 2.17.1"',note:'internal'},
+  {from:'AutoFixAgent',dir:'→',to:'AutoFixAgent',msg:'Extract agentReasoning: "Changed log4j-core 2.14.1→2.17.1 to remediate CVE-2024-1234 RCE"',note:'mandatory'},
+  {divider:'--- AutoFixAgent returns AgentResponse with fixed pom.xml content and agentReasoning ---'},
+  {from:'ACES Webhook',dir:'→',to:'Git / CI-CD',msg:'commitFix(PR-4821, pom.xml, fixedContent, "ACES Auto-Fix: CVE-2024-1234")'},
+  {from:'Git / CI-CD',dir:'←',to:'ACES Webhook',msg:'commitSha: abc123def'},
+  {from:'ACES Webhook',dir:'→',to:'Git / CI-CD',msg:'addPrComment(PR-4821, "ACES fixed CVE-2024-1234. Upgraded log4j-core 2.14.1→2.17.1")'},
+  {from:'ACES Webhook',dir:'→',to:'Git / CI-CD',msg:'retriggerPipeline(PR-4821)  — Snyk will now pass'},
+  {from:'ACES Webhook',dir:'→',to:'Engineer',msg:'Slack: "ACES Auto-Fix: CVE-2024-1234 fixed in PR-4821. Commit abc123. Review and merge."'},
+  {from:'ACES Webhook',dir:'→',to:'ARIA',msg:'async: ExecutionRecord{agentReasoning: "...", tokenCount: 847, status: COMPLETED}'},
+  {from:'ARIA',dir:'→',to:'ARIA',msg:'Update autofix-v1 trust score: +0.01 (clean fix). Write decision archaeology.',note:'async'},
+];
+const afSeqEl = document.getElementById('autofix-seq');
+afSeqEl.innerHTML = afSeq.map(r => {
+  if(r.divider) return `<div class="sdiv">${r.divider}</div>`;
+  const colors = {
+    'Snyk / Sonar':'var(--red)','ACES Webhook':'var(--amber)',
+    'ARIA':'var(--blue)','AutoFixAgent':'var(--green)',
+    'Git / CI-CD':'var(--purple)','Engineer':'var(--amber)'
+  };
+  const fc = colors[r.from]||'var(--muted)';
+  const tc = colors[r.to]||'var(--muted)';
+  return `<div class="seq-row">
+    <span class="sf" style="color:${fc}">${r.from}</span>
+    <span class="sd">${r.dir}</span>
+    <span class="st" style="color:${tc}">${r.to}</span>
+    <span class="sm" style="color:var(--text)">${r.msg}</span>
+    ${r.note?`<span style="font-size:9px;color:var(--muted);font-style:italic;">${r.note}</span>`:''}
+  </div>`;
+}).join('');
+
+// Demo timeline
+const demoSteps = [
+  {time:'0:00',color:'var(--red)',stage:'Opening — The Problem',
+   action:'Show the current state. Open a terminal. Run a Snyk scan that returns a CRITICAL vulnerability. Point to the engineer\'s inbox: 47 unread security alerts.',
+   screen:`$ snyk test
+✗ Critical severity vulnerability found in log4j-core@2.14.1
+  Path: pom.xml > log4j-core
+  More info: https://security.snyk.io/vuln/CVE-2024-1234
+
+47 vulnerabilities found. 3 critical.`,
+   impact:'Engineers spend 45 minutes per vulnerability. Multiply by 47. That is 35 hours this week alone.',
+   impactColor:'var(--red)'},
+  {time:'0:30',color:'var(--amber)',stage:'Scenario 1 — ARIA Blocks a Bad Agent',
+   action:'Open the ACES dashboard. Show mcp-infra-agent with trust score 0.29 (declining — 5 prod incidents). Submit a request to modify SecurityConfig.java using this agent.',
+   screen:`POST /api/v1/execute
+{
+  "agentId": "mcp-infra-v1",
+  "taskType": "MODIFY_AUTH_CONFIG",
+  "context": { "files": ["SecurityConfig.java"] }
+}
+
+← 403 FORBIDDEN
+{
+  "decision": "BLOCK",
+  "trustScore": 0.29,
+  "reason": "Agent has 5 production incidents in 90 days.
+            Trust declining. Auth config in prod blocked.",
+  "archaeology": "https://aces/decisions/DEC-001"
+}`,
+   impact:'ARIA stopped this before it reached production. Decision recorded. Full audit trail.',
+   impactColor:'var(--green)'},
+  {time:'2:30',color:'var(--green)',stage:'Scenario 2 — ACES Auto-Fixes the Snyk Vulnerability',
+   action:'Fire the Snyk webhook manually. Show the ACES webhook receiving it. Switch to GitHub — watch the commit appear in PR-4821. Show the PR comment ACES added.',
+   screen:`$ curl -X POST /api/v1/webhooks/snyk \\
+  -d '{"issues":[{"id":"CVE-2024-1234","severity":"critical",
+       "pkgName":"log4j-core","pkgVersions":["2.14.1"],
+       "fixedIn":["2.17.1"]}], "prId":"PR-4821"}'
+
+← 202 Accepted  (ACES processing async)
+
+[GitHub PR-4821, 8 seconds later]
+Commit: ACES Auto-Fix: CVE-2024-1234
+Changed: log4j-core 2.14.1 → 2.17.1
+Reason: Remediated Remote Code Execution vulnerability.
+        Minimum change applied. No other files modified.`,
+   impact:'8 seconds. Zero engineer time. Pipeline already retriggering.',
+   impactColor:'var(--green)'},
+  {time:'5:30',color:'var(--blue)',stage:'Decision Archaeology + Trust Score',
+   action:'Open the archaeology URL from the BLOCK decision. Show plain-English explanation. Show the auto-fix agent\'s trust score updated to 0.83 after clean fix.',
+   screen:`Decision DEC-001 — BLOCK
+Agent: mcp-infra-v1  Trust: 0.29 (Critical band)
+Decision: BLOCK
+Reason: "MCP Infrastructure Agent has 5 production incidents
+in the last 90 days with a declining trust trend. Touching
+authentication configuration in production is not permitted
+for agents in the Critical trust band."
+Archaeology: every signal that contributed to this decision.
+
+Agent autofix-v1 trust score: 0.82 → 0.83 (+0.01 clean fix)`,
+   impact:'Every decision is explainable. Every agent is accountable.',
+   impactColor:'var(--blue)'},
+  {time:'6:30',color:'var(--purple)',stage:'Management View',
+   action:'Switch to the management dashboard. Show: 3 agents, their trust scores, cost per agent this month, incidents prevented.',
+   screen:`ACES — Management Dashboard
+─────────────────────────────────────
+Agent             Trust    Cost/Month  Incidents
+claude-dev-v1     0.91     $42.30      0
+mcp-infra-v1      0.29     $18.90      5 (prod)
+autofix-v1        0.83     $8.40       0
+
+Auto-fixes this week: 12
+Developer time saved: 9 hours
+Incidents prevented by ARIA: 3`,
+   impact:'Management can see AI cost, risk, and value in one view.',
+   impactColor:'var(--purple)'},
+  {time:'7:30',color:'var(--amber)',stage:'Close — The Roadmap',
+   action:'Back to slides. One slide. Three phases. Phase 1: done (what you just saw). Phase 2: ACES generates entire services from YAML specs. Phase 3: ACES extends itself.',
+   screen:`Phase 1 (NOW): Execute + Govern
+  ✓ Running live. Auto-fix working. ARIA governing.
+
+Phase 2 (Q2): Spec-Driven Generation
+  Engineer writes YAML → ACES generates Spring Boot service
+
+Phase 3 (Q3/Q4): Self-Improving Platform
+  ACES generates new ACES modules. Full autonomous engineering.`,
+   impact:'Ask for: one squad, one quarter, access to pilot teams.',
+   impactColor:'var(--amber)'},
+];
+const demotl = document.getElementById('demo-tl');
+demoSteps.forEach(s => {
+  demotl.innerHTML += `
+  <div class="demo-step">
+    <div class="demo-left">
+      <div class="demo-circle" style="background:${s.color}20;color:${s.color};border:1px solid ${s.color}40;">${s.time}</div>
+      <div class="demo-line"></div>
+    </div>
+    <div class="demo-content">
+      <div class="demo-header">
+        <span class="demo-stage" style="color:${s.color}">${s.stage}</span>
+      </div>
+      <div class="demo-action">${s.action}</div>
+      <div class="demo-screen">${s.screen}</div>
+      <div class="demo-impact" style="background:${s.impactColor}15;color:${s.impactColor}">${s.impact}</div>
+    </div>
+  </div>`;
+});
+</script>
+</body>
+</html>

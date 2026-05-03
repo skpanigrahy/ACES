@@ -1,0 +1,8 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: aces-evaluation
+
+aces:
+  decision-service-url: http://localhost:8082/api/v1/decide

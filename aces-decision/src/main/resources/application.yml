@@ -1,0 +1,9 @@
+server:
+  port: 8082
+
+logging:
+  level:
+    com.aces: DEBUG
+
+aces:
+  policy-service-url: http://localhost:8083/api/v1/policy # Mocked for MVP
