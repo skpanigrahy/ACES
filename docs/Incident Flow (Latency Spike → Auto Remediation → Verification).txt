@@ -1,0 +1,32 @@
+Monitoring   Ingestion  Evaluation  DecisionEngine  Policy  Orchestrator  Plugin/Exec  Ext.System  Verification  Audit
+     │            │           │            │            │          │            │            │           │           │
+     │Signal(lat) │           │            │            │          │            │            │           │           │
+     │───────────>│           │            │            │          │            │            │           │           │
+     │            │Normalize  │            │            │          │            │            │           │           │
+     │            │Correlate  │            │            │          │            │            │           │           │
+     │            │──────────>│            │            │          │            │            │           │           │
+     │            │           │Threshold>  │            │          │            │            │           │           │
+     │            │           │Incident=true            │          │            │            │           │           │
+     │            │           │───────────>│            │          │            │            │           │           │
+     │            │           │            │SelectStrat │          │            │            │           │           │
+     │            │           │            │(Restart/Scale)        │            │            │           │           │
+     │            │           │            │───────────>│          │            │            │           │           │
+     │            │           │            │PolicyCheck │─────────>│            │            │           │           │
+     │            │           │            │            │ Approved │            │            │           │           │
+     │            │           │            │<───────────│          │            │            │           │           │
+     │            │           │            │TriggerFlow │───────────>│           │            │           │           │
+     │            │           │            │            │          │ExecuteAction            │           │           │
+     │            │           │            │            │          │───────────>│            │           │           │
+     │            │           │            │            │          │            │Restart/Scale           │           │
+     │            │           │            │            │          │            │───────────>│           │           │
+     │            │           │            │            │          │            │            │Success    │           │
+     │            │           │            │            │          │            │<───────────│           │           │
+     │            │           │            │            │          │            │TriggerHealth            │           │
+     │            │           │            │            │          │            │────────────────────────>│           │
+     │            │           │            │            │          │            │                        │CheckLatency│
+     │            │           │            │            │          │            │                        │───────────>
+     │            │           │            │            │          │            │                        │LatencyOK   │
+     │            │           │            │            │          │            │                        │<───────────
+     │            │           │            │            │          │            │                        │RESOLVED    │
+     │            │           │            │            │          │            │                        │LogOutcome  │
+     │            │           │            │            │          │            │                        │───────────>

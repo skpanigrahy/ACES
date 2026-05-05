@@ -1,0 +1,72 @@
+[ SIGNAL RECEIVED ]
+       │
+       ▼
+┌──────────────────────────────┐
+│   NORMALIZE & VALIDATE       │
+│ • Schema Validation          │
+│ • Correlation ID Assignment  │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│   STATE EVALUATION           │
+│ • Observed vs Desired State  │
+│ • Context Enrichment (Seal)  │
+└──────────────┬───────────────┘
+               │
+               ▼
+       ┌───────────────┐
+       │ DRIFT / ISSUE?│
+       └───────┬───────┘
+               │
+     ┌─────────┴─────────┐
+     │                   │
+     ▼                   ▼
+[ NO ACTION ]      [ ACTION REQUIRED ]
+     │                   │
+     ▼                   ▼
+[ LOG & CLOSE ]  ┌──────────────────────────────┐
+                 │   CLASSIFY ISSUE TYPE        │
+                 │ • Cert Drift                 │
+                 │ • Incident / Threshold       │
+                 │ • Crypto / Policy Violation  │
+                 └──────────────┬───────────────┘
+                                │
+                                ▼
+                 ┌──────────────────────────────┐
+                 │   SELECT STRATEGY            │
+                 │ • Restart / Reload (Low Cost)│
+                 │ • Config Update (Med Cost)   │
+                 │ • CI/CD Deploy (High Cost)   │
+                 │ • Scale / Rollback           │
+                 └──────────────┬───────────────┘
+                                │
+                                ▼
+                 ┌──────────────────────────────┐
+                 │   POLICY & GOVERNANCE CHECK  │
+                 │ • Seal Ownership Valid?      │
+                 │ • Environment Constraints?   │
+                 │ • Approval Required?         │
+                 └───────┬──────────────┬───────┘
+                         │              │
+                         ▼              ▼
+                 [ BLOCK / ESCALATE ] [ APPROVED ]
+                                         │
+                                         ▼
+                 ┌──────────────────────────────┐
+                 │   SELECT EXECUTION PATH      │
+                 │ • MCP Plugin / Agent         │
+                 │ • CI/CD Pipeline             │
+                 │ • Direct Config API          │
+                 └──────────────┬───────────────┘
+                                │
+                                ▼
+                 ┌──────────────────────────────┐
+                 │   SELECT SKILL / WORKFLOW    │
+                 │ • Load .skills Definition    │
+                 │ • Validate Step Sequence     │
+                 │ • Inject Parameters          │
+                 └──────────────┬───────────────┘
+                                │
+                                ▼
+                         [ EXECUTE ]

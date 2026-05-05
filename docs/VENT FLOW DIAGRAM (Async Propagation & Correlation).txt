@@ -1,0 +1,94 @@
+┌─────────────────────────────────────────────────────────────────┐
+│                    EVENT SOURCES                                 │
+│  CertGuardian  | Monitoring  | CryptoLite  | CI/CD Webhooks     │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  TOPIC: raw_signals                                             │
+│  Payload: { type, seal, app, payload, timestamp }               │
+│  Headers: correlation_id, traceparent                           │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  SERVICE: INGESTION                                             │
+│  • Validate schema                                              │
+│  • Enrich with seal/env context                                 │
+│  • Propagate correlation_id                                     │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  TOPIC: normalized_signals                                      │
+│  Payload: { correlation_id, canonical_event, context }          │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  SERVICE: STATE EVALUATION                                      │
+│  • Compare observed vs desired                                  │
+│  • Detect drift / threshold breach                              │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  TOPIC: evaluation_results                                      │
+│  Payload: { correlation_id, drift=true, type, severity }        │
+└────────────────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  SERVICE: DECISION ENGINE                                       │
+│  • Apply rules                                                  │
+│  • Select strategy & skill                                      │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  TOPIC: decisions                                               │
+│  Payload: { correlation_id, action_required, strategy, skill }  │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  SERVICE: POLICY & GOVERNANCE                                   │
+│  • Validate ownership & env constraints                         │
+│  • Route to approved_actions or rejected_actions                │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+    ┌──────┴──────┐
+    ▼             ▼
+┌──────────┐ ┌──────────┐
+│ approved │ │ rejected │
+│ actions  │ │ actions  │
+└────┬─────┘ └─────────┘
+     │            ▼
+     │     [ ALERT / ESCALATION TOPIC ]
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  TOPIC: execution_requests                                      │
+│  Payload: { correlation_id, workflow_id, skill, inputs }        │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  SERVICE: ORCHESTRATOR → PLUGIN → EXTERNAL SYSTEMS              │
+│  • Execute steps via ToolGateway/AgentService                   │
+│  • Log via RunLedger                                            │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  TOPIC: verification_results                                    │
+│  Payload: { correlation_id, workflow_id, status, outcome }      │
+└──────────┬──────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  SERVICE: OBSERVABILITY & AUDIT                                 │
+│  • Persist to Oracle 23ai                                       │
+│  • Emit metrics to Dynatrace                                    │
+│  • Close correlation trace                                      │
+└─────────────────────────────────────────────────────────────────┘

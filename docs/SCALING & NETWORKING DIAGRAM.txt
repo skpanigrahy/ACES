@@ -1,0 +1,56 @@
+┌─────────────────────────────────────────────────────────────────┐
+│                 📈 SCALING STRATEGY (GAIA)                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Horizontal Scaling (All Core Services)                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Load: High signal volume → Add instances               │   │
+│  │  Mechanism: GAIA Auto-Scaling Groups                    │   │
+│  │  Trigger: CPU > 70% OR Queue depth > threshold         │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  Independent Scaling per Service                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Ingestion: Scale on signal rate                        │   │
+│  │  Decision: Scale on rule evaluation load                │   │
+│  │  Orchestrator: Scale on workflow count                  │   │
+│  │  Plugin: Scale on external call concurrency             │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  Database Scaling                                               │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Oracle 23ai: Read replicas for evaluation queries      │   │
+│  │  Write path: Primary instance only                      │   │
+│  │  Connection pooling: HikariCP per service               │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                 🔐 NETWORKING & COMMUNICATION                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Internal Service Communication (GAIA Network)                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Protocol: HTTPS / mTLS                                 │   │
+│  │  Service Discovery: GAIA Service Registry               │   │
+│  │  Load Balancing: Client-side (Ribbon) or LB             │   │
+│  │  Timeout: 30s default, configurable per call            │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  External System Communication                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Protocol: HTTPS / mTLS / OAuth2                        │   │
+│  │  Circuit Breaker: Resilience4j per adapter              │   │
+│  │  Retry Policy: Exponential backoff, max 3 attempts      │   │
+│  │  Fallback: Queue for later processing or alert          │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  Event-Driven Communication (Future Phase)                      │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Kafka / Oracle AQ for async signal propagation         │   │
+│  │  Topics: raw_signals, decisions, execution_commands     │   │
+│  │  Consumer Groups: One per service for parallel processing│   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘

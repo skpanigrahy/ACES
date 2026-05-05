@@ -1,0 +1,47 @@
+┌─────────────────────────────────────────────────────────────────┐
+│                  ACES PERSISTENCE LAYER (Oracle 23ai)            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────────────────────────┐  ┌──────────────────────────┐ │
+│  │  workflow_state              │  │  audit_log               │ │
+│  ├──────────────────────────────┤  ├──────────────────────────┤ │
+│  │ PK workflow_id (VARCHAR)     │  │ PK id (NUMBER)           │ │
+│  │ FK correlation_id (VARCHAR)  │  │ FK correlation_id        │ │
+│  │ status (VARCHAR)             │  │ FK workflow_id           │ │
+│  │ current_step (VARCHAR)       │  │ event_type (VARCHAR)     │ │
+│  │ skill_name (VARCHAR)         │  │ event_payload (JSON/CLOB)│ │
+│  │ created_at (TIMESTAMP)       │  │ service_name (VARCHAR)   │ │
+│  │ updated_at (TIMESTAMP)       │  │ timestamp (TIMESTAMP)    │ │
+│  └──────────────────────────────┘  └──────────────────────────┘ │
+│           │ 1:N                          │ 1:N                   │
+│           ▼                              ▼                       │
+│  ┌──────────────────────────────┐  ┌──────────────────────────┐ │
+│  │  decision_log                │  │  cost_token_tracking     │ │
+│  ├──────────────────────────────┤  ├──────────────────────────┤ │
+│  │ PK id (NUMBER)               │  │ PK id (NUMBER)           │ │
+│  │ FK correlation_id            │  │ FK workflow_id           │ │
+│  │ rule_applied (VARCHAR)       │  │ tokens_input (NUMBER)    │ │
+│  │ strategy_selected (VARCHAR)  │  │ tokens_output (NUMBER)   │ │
+│  │ confidence_score (DECIMAL)   │  │ infra_cost (DECIMAL)     │ │
+│  │ reasoning (CLOB)             │  │ optimization_applied     │ │
+│  │ approved (BOOLEAN)           │  │ timestamp (TIMESTAMP)    │ │
+│  └──────────────────────────────┘  └──────────────────────────┘ │
+│                                                                  │
+│  ┌──────────────────────────────┐  ┌──────────────────────────┐ │
+│  │  policy_store                │  │  skill_registry          │ │
+│  ├──────────────────────────────┤  ├──────────────────────────┤ │
+│  │ PK policy_id (VARCHAR)       │  │ PK skill_id (VARCHAR)    │ │
+│  │ name (VARCHAR)               │  │ name (VARCHAR)           │ │
+│  │ rules (JSON)                 │  │ version (VARCHAR)        │ │
+│  │ env_constraint (VARCHAR)     │  │ definition (JSON/CLOB)   │ │
+│  │ approval_required (BOOLEAN)  │  │ status (ACTIVE/DEPRECATED│ │
+│  │ created_at (TIMESTAMP)       │  │ created_at (TIMESTAMP)   │ │
+│  └──────────────────────────────┘  └──────────────────────────┘ │
+│                                                                  │
+│  🔑 INDEXES & CONSTRAINTS:                                      │
+│  • idx_audit_correlation ON audit_log(correlation_id)           │
+│  • idx_workflow_status ON workflow_state(status)                │
+│  • idx_event_timestamp ON audit_log(timestamp)                  │
+│  • FK constraints enforce referential integrity                 │
+│  • JSON columns enable policy/skill versioning & query flexibility│
+└─────────────────────────────────────────────────────────────────┘

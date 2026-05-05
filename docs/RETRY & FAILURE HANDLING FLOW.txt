@@ -1,0 +1,44 @@
+[ STEP EXECUTION FAILS ]
+       │
+       ▼
+┌──────────────────────────────┐
+│   ERROR CLASSIFICATION       │
+│ • Transient (network, timeout)│
+│ • Permanent (config, policy)  │
+│ • Validation (bad input)      │
+└───────┬─────────────────────┘
+        │
+  ┌─────┴─────┐
+  ▼           ▼
+[TRANSIENT] [PERMANENT/VALIDATION]
+  │           │
+  ▼           ▼
+┌──────────┐ ┌──────────────┐
+│ RETRY    │ │ ESCALATE     │
+│ STRATEGY │ │ IMMEDIATELY  │
+└────┬─────┘ └──────┬───────┘
+     │              │
+     ▼              ▼
+┌──────────┐ ┌──────────────┐
+│ Exponential│ │ Alert Team   │
+│ Backoff    │ │ Log Root Cause│
+│ Jitter     │ │ Block Workflow│
+└────┬─────┘ └──────┬───────┘
+     │              │
+     ▼              ▼
+  Success?      [ WORKFLOW
+     │           TERMINATED ]
+  ┌──┴──┐
+  ▼     ▼
+ YES    NO
+  │     │
+  ▼     ▼
+[STEP  [RETRY LIMIT
+COMPLETE] EXHAUSTED?]
+  │     │
+  │    YES
+  │     │
+  │     ▼
+  │  [ESCALATE]
+  │
+  └──→ [CONTINUE NEXT STEP]

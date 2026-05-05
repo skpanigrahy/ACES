@@ -1,0 +1,58 @@
+┌─────────────────────────────────────────────────────────────────┐
+│              🛡️ GOVERNANCE & POLICY FLOW                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  [ DECISION ENGINE OUTPUT ]                                     │
+│  { action_required: true, strategy: "RESTART", skill: "..." }   │
+│                          │                                      │
+│                          ▼                                      │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  POLICY EVALUATION ENGINE                               │   │
+│  │                                                         │   │
+│  │  Validate:                                              │   │
+│  │  • Seal ownership (payments seal → payments actions)   │   │
+│  │  • Environment rules (prod → stricter)                 │   │
+│  │  • Action type constraints (deploy → approval)         │   │
+│  │  • Budget / cost limits                                │   │
+│  │                                                         │   │
+│  │  Output: ALLOW / DENY / REQUIRE_APPROVAL                │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│         ┌─────────┴─────────┐                                  │
+│         ▼                   ▼                                  │
+│  [ DENY / BLOCK ]    [ ALLOW / APPROVE ]                       │
+│         │                   │                                  │
+│         ▼                   ▼                                  │
+│  ┌──────────────┐  ┌─────────────────────────────────┐       │
+│  │ Log rejection│  │ APPROVAL WORKFLOW (if required) │       │
+│  │ Alert team   │  │                                 │       │
+│  │ Escalate     │  │ • Notify approver (Slack/Email)│       │
+│  └──────────────┘  │ • Wait for decision (timeout)  │       │
+│                    │ • Record approval metadata     │       │
+│                    └────────┬────────────────────────┘       │
+│                             │                                │
+│                    ┌────────┴────────┐                       │
+│                    ▼                 ▼                       │
+│             [ REJECTED ]      [ APPROVED ]                   │
+│                    │                 │                       │
+│                    ▼                 ▼                       │
+│             [ ESCALATE ]   ┌─────────────────────────┐       │
+│                            │ EXECUTION GATE OPENS    │       │
+│                            │ • Pass to Orchestrator  │       │
+│                            │ • Attach approval audit │       │
+│                            └────────┬────────────────┘       │
+│                                     │                        │
+│                                     ▼                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  AUDIT & COMPLIANCE LOGGING                             │   │
+│  │                                                         │   │
+│  │  Record:                                                │   │
+│  │  • Who decided (system/user)                           │   │
+│  │  • What policy was applied                             │   │
+│  │  • When approval was granted/denied                    │   │
+│  │  • Full decision reasoning                             │   │
+│  │                                                         │   │
+│  │  Immutable, searchable, compliance-ready               │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘

@@ -1,0 +1,30 @@
+        ┌──────────────┐
+        │   PENDING    │ ◄── Initial state after decision approval
+        └──────┬───────┘
+               │ trigger_execution
+               ▼
+        ┌──────────────┐
+        │ IN_PROGRESS  │ ◄── Skill loaded, step cursor initialized
+        └──────┬───────┘
+               │
+      ┌────────┴────────┐
+      │                 │
+      ▼                 ▼
+┌──────────────┐  ┌──────────────┐
+│   EXECUTED   │  │    FAILED    │ ◄── Step execution error / timeout
+└──────┬───────┘  └──────┬───────┘
+       │                 │
+       ▼          ┌──────┴───────┐
+──────────────┐  │   RETRYING   │ ◄── Configurable backoff (max_attempts)
+│  VERIFYING   │  └─────────────┘
+──────┬───────┘         │
+       │          ┌─────────────┐
+       ▼          │  ESCALATED   │ ◄── Retry limit reached → human/alert
+┌──────────────┐  └──────────────┘
+│   SUCCESS    │
+└──────┬───────┘
+       │ all_steps_verified
+       ▼
+┌──────────────┐
+│  COMPLETED   │ ◄── Final state, audit sealed
+└──────────────┘

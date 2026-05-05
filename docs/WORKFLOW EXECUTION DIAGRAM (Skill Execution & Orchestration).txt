@@ -1,0 +1,73 @@
+┌─────────────────────────────────────────────────────────────────┐
+│              WORKFLOW EXECUTION FLOW (ACES Orchestrator)        │
+├─────────────────────────────────────────────────────────────────┤
+│  [ DECISION OUTPUT ]                                            │
+│  Strategy + Skill Name + Context                                │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  1. SKILL LOADER                                                │
+│  • Fetch skill definition from Skill Registry                   │
+│  • Validate schema & policy constraints                         │
+│  • Resolve input parameters from decision context               │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  2. WORKFLOW INITIALIZATION                                     │
+│  • Generate workflow_id                                         │
+│  • Set status = PENDING → IN_PROGRESS                           │
+│  • Initialize step cursor & execution context                   │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  3. STEP ORCHESTRATOR (SimpleOrchestrator Loop)                 │
+│                                                                  │
+│  WHILE steps_remaining:                                          │
+│    │                                                             │
+│    ├─ GET next_step (type: CHECK / ACTION / VERIFY / NOTIFY)    │
+│    │                                                             │
+│    ├─ IF type = CHECK:                                          │
+│    │   → Validate preconditions & system state                  │
+│    │   → Branch logic (if/else)                                 │
+│    │                                                             │
+│    ├─ IF type = ACTION:                                         │
+│    │   → Build ToolRequest / AgentInput                         │
+│    │   → Delegate to ToolGateway or AgentService                │
+│    │   → Await execution result                                 │
+│    │                                                             │
+│    ├─ IF type = VERIFY:                                         │
+│    │   → Trigger state re-check                                 │
+│    │   → Compare expected vs actual                             │
+│    │                                                             │
+│    ├─ LOG step via RunLedger (status, cost, timestamp)          │
+│    │                                                             │
+│    ├─ IF step_success → advance cursor                          │
+│    │                                                             │
+│    └─ IF step_failure → trigger retry_or_escalate               │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  4. EXECUTION DELEGATION (Data Plane)                           │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────┐  │
+│  │  ToolGateway     │  │  AgentService    │  │  MCP Plugin  │  │
+│  │  • CI/CD Trigger │  │  • Auto-Fix Plan │  │  • Restart   │  │
+│  │  • Config API    │  │  • Analysis      │  │  • Scale     │  │
+│  │  • External REST │  │  • Reasoning     │  │  • Reload    │  │
+│  └─────────────────┘  ────────┬─────────┘  └──────┬───────┘  │
+│           └─────────────────────┼────────────────────┘           │
+│                                 ▼                                │
+│                    [ External System Execution ]                 │
+└─────────────────────────────────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  5. WORKFLOW CLOSURE                                            │
+│  • All steps completed successfully → status = COMPLETED        │
+│  • Verification passed → Desired State Achieved                 │
+│  • Persist final workflow_state & audit trail                   │
+│  • Emit workflow_completed event                                │
+└─────────────────────────────────────────────────────────────────┘

@@ -1,0 +1,33 @@
+CertGuardian Ingestion  Evaluation  DecisionEngine  Policy  Orchestrator  Plugin/Exec  CI/CD       Verification  Audit
+     │            │           │            │            │          │            │            │           │           │
+     │Signal(crypto)         │            │            │          │            │            │           │           │
+     │───────────>│           │            │            │          │            │            │           │           │
+     │            │Normalize  │            │            │          │            │            │           │           │
+     │            │Correlate  │            │            │          │            │            │           │           │
+     │            │──────────>│            │            │          │            │            │           │           │
+     │            │           │TLS/Cipher  │            │          │            │            │           │           │
+     │            │           │≠Policy     │            │          │            │            │           │           │
+     │            │           │NonCompliant│            │          │            │            │           │           │
+     │            │           │───────────>│            │          │            │            │           │           │
+     │            │           │            │SelectStrat │          │            │            │           │           │
+     │            │           │            │(Config/Deploy)        │            │            │           │           │
+     │            │           │            │───────────>│          │            │            │           │           │
+     │            │           │            │PolicyCheck │─────────>│            │            │           │           │
+     │            │           │            │            │ Approved │            │            │           │           │
+     │            │           │            │<───────────│          │            │            │           │           │
+     │            │           │            │TriggerFlow │───────────>│           │            │           │           │
+     │            │           │            │            │          │TriggerPipeline            │           │           │
+     │            │           │            │            │          │───────────>│            │           │           │
+     │            │           │            │            │          │            │Deploy+CryptoConfig       │           │
+     │            │           │            │            │          │            │───────────>│           │           │
+     │            │           │            │            │          │            │            │PipelineOK │           │
+     │            │           │            │            │          │            │<───────────│           │           │
+     │            │           │            │            │          │            │TriggerCryptoVerify        │           │
+     │            │           │            │            │          │            │────────────────────────>│           │
+     │            │           │            │            │          │            │                        │CheckTLS/PQC│
+     │            │           │            │            │          │            │                        │───────────>
+     │            │           │            │            │          │            │                        │Compliant   │
+     │            │           │            │            │          │            │                        │<───────────
+     │            │           │            │            │          │            │                        │RESOLVED    │
+     │            │           │            │            │          │            │                        │LogOutcome  │
+     │            │           │            │            │          │            │                        │───────────>

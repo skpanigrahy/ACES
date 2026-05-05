@@ -1,0 +1,62 @@
+┌─────────────────────────────────────────────────────────────────┐
+│              💰 COST & OPTIMIZATION FEEDBACK LOOP               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  [ EXECUTION COMPLETED ]                                        │
+│  { workflow_id: "xyz", status: "SUCCESS", duration: 120s }      │
+│                          │                                      │
+│                          ▼                                      │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  COST & TOKEN TRACKING ENGINE                           │   │
+│  │                                                         │   │
+│  │  Capture:                                               │   │
+│  │  • Compute cost (GAIA instance-hours)                  │   │
+│  │  • External API costs (CI/CD, agent calls)             │   │
+│  │  • Token usage (if AI-assisted decision)               │   │
+│  │  • Storage / network costs                             │   │
+│  │                                                         │   │
+│  │  Attribute cost to:                                     │   │
+│  │  • Seal / team • Application • Workflow type           │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│                   ▼                                             │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  PERFORMANCE & OUTCOME METRICS                          │   │
+│  │                                                         │   │
+│  │  Track:                                                 │   │
+│  │  • Success rate per strategy                           │   │
+│  │  • Time-to-resolution                                  │   │
+│  │  • Retry count / escalation rate                       │   │
+│  │  • Verification pass rate                              │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│                   ▼                                             │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  OPTIMIZATION ENGINE (Learning Loop)                    │   │
+│  │                                                         │   │
+│  │  Analyze:                                               │   │
+│  │  • Cost vs. success trade-offs                         │   │
+│  │  • Strategy effectiveness by context                   │   │
+│  │  • Pattern detection (repeated failures)               │   │
+│  │                                                         │   │
+│  │  Output:                                                │   │
+│  │  • Recommended strategy weights                        │   │
+│  │  • Cost-aware decision hints                           │   │
+│  │  • Policy adjustment suggestions                       │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│                   ▼                                             │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  DECISION ENGINE FEEDBACK INTEGRATION                   │   │
+│  │                                                         │   │
+│  │  Update:                                                │   │
+│  │  • Strategy selection algorithm                        │   │
+│  │  • Cost-aware rule priorities                          │   │
+│  │  • AI advisor training data (if used)                  │   │
+│  │                                                         │   │
+│  │  Result: Future decisions are more efficient           │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  🔄 LOOP CONTINUES: Each execution improves the next           │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘

@@ -1,0 +1,83 @@
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           SIGNAL SOURCES                                     │
+│  CertGuardian  |  Monitoring Systems  |  CryptoLite  |  CI/CD Triggers      │
+└──────────────────────────┬───────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        INGESTION SERVICE                                     │
+│  • Receive & validate signals (REST/Event)                                   │
+│  • Normalize payload & generate correlation_id                               │
+│  • Route to State Evaluation Service                                         │
+└──────────────────────────┬───────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     STATE EVALUATION SERVICE                                 │
+│  • Compare observed vs desired state                                         │
+│  • Detect drift, violations, threshold breaches                              │
+│  • Output: EvaluationResult (drift, severity, type)                          │
+└──────────────────────────┬───────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                       DECISION ENGINE SERVICE                                │
+│  • Apply rule-based logic (state, threshold, policy)                         │
+│  • Select strategy (restart, reload, deploy, config update)                  │
+│  • Map to skill/workflow definition                                          │
+└──────────────┬───────────────────────────────┬───────────────────────────────┘
+               │                               │
+               ▼                               ▼
+┌──────────────────────────────┐  ┌────────────────────────────────────────────┐
+│    POLICY & GOVERNANCE SVC   │  │         SKILL REGISTRY SERVICE             │
+│  • Validate ownership (seal) │  │  • Store/retrieve .skills definitions      │
+│  • Check env constraints     │  │  • Version control for workflows           │
+│  • Approval gate enforcement │  │  • Provide to Orchestrator on demand       │
+└──────────────┬───────────────┘  └────────────────────────────────────────────┘
+               │ (Approved)
+               ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    WORKFLOW ORCHESTRATOR SERVICE                             │
+│  • Load skill definition from Registry                                       │
+│  • Manage step execution (sequential/parallel)                               │
+│  • Track workflow_state & handle retries/escalation                          │
+└──────────────────────────┬───────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     PLUGIN / EXECUTION SERVICE                               │
+│  • MCP Plugin Adapter (external tool interaction)                            │
+│  • Agent Connector (team-owned automation agents)                            │
+│  • CI/CD Trigger Adapter (pipeline execution)                                │
+└──────────┬───────────────────────────────────────────────────┬───────────────┘
+           │                                                   │
+           ▼                                                   ▼
+┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐
+│    AGENTS (MCP)      │   │    CI/CD PIPELINES   │   │    CONFIG SYSTEMS    │
+│ (restart, reload, etc)│   │ (Jenkins, GitLab)    │   │ (CryptoLite, DCM)    │
+└──────────┬───────────┘   └──────────┬───────────┘   └──────────┬───────────┘
+           │                          │                          │
+           └──────────────────────────┼──────────────────────────┘
+                                      │
+                                      ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                       VERIFICATION SERVICE                                   │
+│  • Re-trigger state checks (via CertGuardian/Monitoring APIs)                │
+│  • Validate outcome matches desired state                                    │
+│  • Trigger retry or escalation on failure                                    │
+└──────────────┬───────────────────────────────────────────────────┬───────────┘
+               │                                                   │
+               ▼                                                   ▼
+┌──────────────────────────────┐  ┌────────────────────────────────────────────┐
+│    OBSERVABILITY & AUDIT SVC │  │       COST & TOKEN TRACKING SVC            │
+│  • Structured logging        │  │  • Track execution cost per workflow       │
+│  • OpenTelemetry tracing     │  │  • Track AI token usage (Phase 2)          │
+│  • Immutable audit trail     │  │  • Attribute cost to seal/app              │
+└──────────────────────────────┘  └────────────────────────────────────────────┘
+
+┌──────────────────────────────┐  ┌────────────────────────────────────────────┐
+│     QUERY & REPORTING SVC    │  │         SIMULATION SERVICE                 │
+│  • Workflow history APIs     │  │  • Dry-run execution without impact        │
+│  • Compliance dashboards     │  │  • Predict outcomes & validate policies    │
+│  • Aggregated metrics export │  │  • Strategy testing before production      │
+└──────────────────────────────┘  └────────────────────────────────────────────┘

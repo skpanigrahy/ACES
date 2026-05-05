@@ -1,0 +1,35 @@
+CertGuardian  Ingestion  Evaluation  DecisionEngine  Policy  Orchestrator  Plugin/Exec  Ext.System  Verification  Audit
+     │            │           │            │            │          │            │            │           │           │
+     │Signal(cert)│           │            │            │          │            │            │           │           │
+     │───────────>│           │            │            │          │            │            │           │           │
+     │            │Normalize  │            │            │          │            │            │           │           │
+     │            │Validate   │            │            │          │            │            │           │           │
+     │            │Correlate  │            │            │          │            │            │           │           │
+     │            │──────────>│            │            │          │            │            │           │           │
+     │            │           │CompareCert │            │          │            │            │           │           │
+     │            │           │Drift=true  │            │          │            │            │           │           │
+     │            │           │───────────>│            │          │            │            │           │           │
+     │            │           │            │ApplyRules  │          │            │            │           │           │
+     │            │           │            │SelectSkill │          │            │            │           │           │
+     │            │           │            │───────────>│          │            │            │           │           │
+     │            │           │            │PolicyCheck │─────────>│            │            │           │           │
+     │            │           │            │            │ Approved │            │            │           │           │
+     │            │           │            │<───────────│          │            │            │           │           │
+     │            │           │            │TriggerFlow │───────────>│           │            │           │           │
+     │            │           │            │            │          │LoadSkill   │            │           │           │
+     │            │           │            │            │          │ExecuteStep │            │           │           │
+     │            │           │            │            │          │───────────>│            │           │           │
+     │            │           │            │            │          │            │Restart/Rel │           │           │
+     │            │           │            │            │          │            │───────────>│           │           │
+     │            │           │            │            │          │            │            │Success    │           │
+     │            │           │            │            │          │            │<───────────│           │           │
+     │            │           │            │            │          │            │TriggerVerify            │           │
+     │            │           │            │            │          │            │────────────────────────>│           │
+     │            │           │            │            │          │            │                        │Re-checkCert│
+     │            │           │            │            │          │            │                        │───────────>
+     │            │           │            │            │          │            │                        │CertValid   │
+     │            │           │            │            │          │            │                        │<───────────
+     │            │           │            │            │          │            │                        │RESOLVED    │
+     │            │           │            │            │          │            │                        │LogOutcome  │
+     │            │           │            │            │          │            │                        │───────────>
+     │            │           │            │            │          │            │                        │           │

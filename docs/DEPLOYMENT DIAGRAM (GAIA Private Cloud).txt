@@ -1,0 +1,112 @@
+┌─────────────────────────────────────────────────────────────────┐
+│                    👥 USERS & OPERATORS                          │
+│  Dashboards | APIs | SRE Teams | Engineering                     │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │ HTTPS / REST
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                 🌐 API GATEWAY / ENTRY POINT                     │
+│  • Load Balancer (GAIA LB)                                      │
+│  • TLS Termination                                              │
+│  • Rate Limiting / Auth                                         │
+│  • Routes: /signals, /decisions, /execute, /audit              │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │
+                        ▼
+══════════════════════════════════════════════════════════════════
+              🏗️ GAIA PRIVATE CLOUD (ACES DEPLOYMENT)
+══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│              🧠 ACES SERVICE CLUSTER (Multi-Instance)           │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  INGESTION SERVICE (2+ instances)                       │   │
+│  │  • Receives signals via REST/Event                      │   │
+│  │  • Stateless, horizontally scalable                     │   │
+│  │  • Health endpoint: /actuator/health                    │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│  ┌────────────────▼────────────────────────────────────────┐   │
+│  │  EVALUATION SERVICE (2+ instances)                      │   │
+│  │  • Compares observed vs desired state                   │   │
+│  │  • Stateless, event-driven processing                   │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│  ┌────────────────▼────────────────────────────────────────┐   │
+│  │  DECISION ENGINE (2+ instances)                         │   │
+│  │  • Rule-based logic + optional AI advisor               │   │
+│  │  • Stateless, cached policy/rules                       │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│  ┌────────────────▼────────────────────────────────────────┐   │
+│  │  WORKFLOW ORCHESTRATOR (2+ instances)                   │   │
+│  │  • Manages workflow state (DB-backed)                   │   │
+│  │  • Coordinates step execution, retries                  │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│  ┌────────────────▼────────────────────────────────────────┐   │
+│  │  PLUGIN / EXECUTION SERVICE (2+ instances)              │   │
+│  │  • MCP/Agent/CI-CD adapters                             │   │
+│  │  • Stateful connections to external systems             │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│  ┌────────────────▼────────────────────────────────────────┐   │
+│  │  SUPPORT SERVICES (Single or HA)                        │   │
+│  │  • Policy Service • Skill Registry • Cost Tracking      │   │
+│  │  • Audit Service • Simulation Service                   │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │ Internal GAIA Network (mTLS)
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              🗄️ DATA & STORAGE LAYER                            │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Oracle 23ai Database Cluster                           │   │
+│  │  • workflow_state • audit_log • decision_log            │   │
+│  │  • policy_store • skill_registry • cost_tracking        │   │
+│  │  • HA: Primary + Standby + Read Replicas                │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Cache Layer (Redis / Oracle Coherence)                 │   │
+│  │  • Policy cache • Skill definitions • Session state     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │ External Integrations (Outbound)
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              🔌 EXTERNAL SYSTEMS (Data Plane)                   │
+│                                                                  │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐           │
+│  │ CertGuardian │ │ Monitoring   │ │ CryptoLite   │           │
+│  │ (Signals)    │ │ (Alerts)     │ │ (Config)     │           │
+│  └──────┬───────┘ └──────┬───────┘ └──────┬───────┘           │
+│         │                │                │                    │
+│  ┌──────▼───────┐ ┌──────▼───────┐ ┌──────▼───────┐           │
+│  │ Team Agents  │ │ CI/CD Systems│ │ Config APIs  │           │
+│  │ (MCP/Restart)│ │ (Jenkins)    │ │ (DCM)        │           │
+│  └──────────────┘ └──────────────┘ └──────────────┘           │
+│                                                                  │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │ Observability Integration
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              👁️ OBSERVABILITY & MONITORING                      │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Dynatrace / Enterprise Monitoring                      │   │
+│  │  • Service health • Metrics • Logs • Traces             │   │
+│  │  • Alerting • Dashboards • SLO monitoring               │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Logging Platform (Splunk / ELK)                        │   │
+│  │  • Structured JSON logs • Correlation ID tracing        │   │
+│  │  • Audit trail • Debug replay                          │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘

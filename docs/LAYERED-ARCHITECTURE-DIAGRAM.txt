@@ -1,0 +1,74 @@
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    EXPERIENCE / CONSUMER LAYER                               │
+│  Dashboards | APIs | Operators | Engineering Teams                          │
+│  (UI queries status, triggers manual approvals, views audit logs)           │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    SIGNAL / INPUT LAYER                                      │
+│  CertGuardian | Monitoring | CryptoLite | CI/CD Events                      │
+│  (External systems generate observable state changes)                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    INGESTION LAYER                                           │
+│  Signal Intake | Validation | Normalization | Correlation                   │
+│  (Standardizes external signals into ACES canonical format)                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    CONTROL PLANE (ACES CORE)                                 │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  State Evaluation Engine                                               │ │
+│  │  • Detect drift / violations                                           │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  Decision Engine                                                       │ │
+│  │  • Rule-based logic | Strategy selection | Skill mapping               │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  Workflow Orchestrator                                                 │ │
+│  │  • Step execution | State tracking | Retry/escalation                  │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  CORE IDENTITY: This is where ACES "thinks", plans, and governs.            │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    GOVERNANCE LAYER                                          │
+│  Policy Engine | Access Control | Approval Gates | Constraints              │
+│  (Mandatory inline validation before any execution step)                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    EXECUTION LAYER (DATA PLANE)                              │
+│  MCP Plugins | Agents | CI/CD Triggers | Config APIs                        │
+│  (ACES orchestrates; external systems perform the actual work)              │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    VERIFICATION LAYER                                        │
+│  Re-check State | Validate Outcome | Close Loop                             │
+│  (Mandatory confirmation that Desired State == Observed State)              │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│              OBSERVABILITY & OPTIMIZATION LAYER                              │
+│  Logs | Metrics | Traces | Cost | Token | Explainability | Simulation       │
+│  (Cross-cutting concerns that monitor, measure, and improve the system)     │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    DATA / STORAGE LAYER                                      │
+│  Workflow State | Audit Logs | Policy Store | Skill Registry | Cost Data    │
+│  (Persistent backbone supporting recovery, replay, and compliance)          │
+└──────────────────────────────────────────────────────────────────────────────┘

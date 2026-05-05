@@ -1,0 +1,85 @@
+┌──────────────────────────────┐
+│       SIGNAL SOURCE          │
+│ CertGuardian | Monitoring    │
+│ CryptoLite | CI/CD Triggers  │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│       INGESTION SERVICE      │
+│ • Validate & Normalize       │
+│ • Generate Correlation ID    │
+│ • Route to Evaluation        │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│   STATE EVALUATION SERVICE   │
+│ • Compare Observed vs Desired│
+│ • Detect Drift / Violation   │
+│ • Enrich Context (Seal/Env)  │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│      DECISION ENGINE         │
+│ • Apply Rule-Based Logic     │
+│ • Select Strategy & Skill    │
+│ • Determine Execution Path   │
+└───────┬─────────────────────┘
+        │                │
+        │                ▼
+        │      ┌────────────────────────┐
+        │      │ GOVERNANCE & POLICY    │
+        │      │ • Seal Ownership Check │
+        │      │ • Environment Rules    │
+        │      │ • Approval Gate        │
+        │      └──────────┬─────────────┘
+        │                 │
+        │         (Rejected/Blocked)
+        │                 │
+        │                  ▼
+        │          [ ESCALATE / ALERT ]
+        │
+        ▼
+┌──────────────────────────────┐
+│   WORKFLOW ORCHESTRATOR      │
+│ • Load Skill Definition      │
+│ • Manage Step Execution      │
+│ • Track Workflow State       │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│      EXECUTION LAYER         │
+│ • MCP Plugins / Agents       │
+│ • CI/CD Pipeline Triggers    │
+│ • Config Management APIs     │
+└───────┬─────────────────────┘
+        │                │
+        ▼                ▼
+[ ACTION EXECUTED ]    [ FAILURE ]
+        │                │
+        ▼                ▼
+┌──────────────────────────────┐
+│   VERIFICATION SERVICE       │
+│ • Re-check System State      │
+│ • Validate Outcome           │
+│ • Confirm Desired State      │
+└───────┬────────────────┬─────┘
+        │                │
+        ▼                ▼
+   [ SUCCESS ]      [ RETRY / ESCALATE ]
+        │
+        ▼
+┌──────────────────────────────┐
+│ OBSERVABILITY & AUDIT        │
+│ • Structured Logging         │
+│ • Metrics & Cost Tracking    │
+│ • Immutable Audit Trail      │
+│ • Explainability Output      │
+└──────────────┬───────────────┘
+               │
+               ▼
+        [ FINAL STATE ]
+  Desired State Achieved ✅

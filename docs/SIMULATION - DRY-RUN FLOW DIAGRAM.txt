@@ -1,0 +1,69 @@
+┌─────────────────────────────────────────────────────────────────┐
+│              🧪 SIMULATION / DRY-RUN FLOW                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  [ SIMULATION REQUEST ]                                         │
+│  { signal: {...}, mode: "dry-run", environment: "test" }        │
+│                          │                                      │
+│                          ▼                                      │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  SIMULATION SERVICE                                     │   │
+│  │                                                         │   │
+│  │  Mode: DRY-RUN (no real execution)                     │   │
+│  │                                                         │   │
+│  │  Steps:                                                 │   │
+│  │  1. Parse signal & context                             │   │
+│  │  2. Run through Evaluation → Decision → Policy         │   │
+│  │  3. Load skill definition                              │   │
+│  │  4. Simulate each step (mock external calls)           │   │
+│  │  5. Predict outcome & cost                             │   │
+│  │                                                         │   │
+│  │  Output:                                                │   │
+│  │  • Predicted actions                                   │   │
+│  │  • Estimated cost / duration                           │   │
+│  │  • Policy compliance check                             │   │
+│  │  • Risk assessment                                     │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│                   ▼                                             │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  MOCK EXECUTION LAYER                                   │   │
+│  │                                                         │   │
+│  │  Replace real plugins with mocks:                       │   │
+│  │  • Agent calls → return predefined success             │   │
+│  │  • CI/CD triggers → simulate pipeline run              │   │
+│  │  • Config updates → validate schema only               │   │
+│  │                                                         │   │
+│  │  No external system is actually modified               │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│                   ▼                                             │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  PREDICTION & REPORTING                                 │   │
+│  │                                                         │   │
+│  │  Generate:                                              │   │
+│  │  • "What-if" analysis report                           │   │
+│  │  • Cost estimate breakdown                             │   │
+│  │  • Policy compliance summary                           │   │
+│  │  • Success probability (based on history)              │   │
+│  │                                                         │   │
+│  │  Output formats: JSON, PDF, Dashboard view             │   │
+│  └────────────────┬────────────────────────────────────────┘   │
+│                   │                                             │
+│                   ▼                                             │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  FEEDBACK TO DECISION ENGINE (Optional)                 │   │
+│  │                                                         │   │
+│  │  Use simulation results to:                            │   │
+│  │  • Tune strategy weights                               │   │
+│  │  • Validate new policies before rollout                │   │
+│  │  • Train AI advisor (if used)                          │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  ✅ BENEFITS:                                                    │
+│  • Test new skills without risk                                │
+│  • Validate policy changes before production                   │
+│  • Estimate cost/impact of automation                          │
+│  • Train teams on ACES behavior                                │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
