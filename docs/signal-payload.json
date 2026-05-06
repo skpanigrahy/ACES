@@ -1,0 +1,24 @@
+{
+  "type": "pipeline_failure",
+  "source": "jules",
+  "seal": "payments",
+  "application": "payment-gateway",
+  "pipeline": {
+    "id": "jenkins-pipeline-4821",
+    "name": "payment-gateway-build",
+    "branch": "feature/upgrade-deps",
+    "commit": "a1b2c3d4",
+    "stage": "test",
+    "error": {
+      "code": "TEST_FAILURE",
+      "message": "NullPointerException in PaymentServiceTest",
+      "stack_trace": "..."
+    }
+  },
+  "context": {
+    "environment": "non-prod",
+    "priority": "medium",
+    "owner": "payments-team"
+  },
+  "timestamp": "2026-05-05T14:30:00Z"
+}
