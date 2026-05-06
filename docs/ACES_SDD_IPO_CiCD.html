@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ACES SDD — CI/CD Auto-Fix: Input → Process → Output</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090f;--s:#0b0f1a;--card:#0f1520;--border:#1a2535;
+  --amber:#f59e0b;--blue:#38bdf8;--green:#34d399;
+  --red:#f87171;--purple:#a78bfa;--oracle:#fb923c;--teal:#2dd4bf;
+  --text:#e2eaf5;--muted:#4a6080;--dim:#1a2535;
+  --font:'Space Grotesk',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(7,9,15,0.96);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);display:flex;align-items:center;
+  padding:0 20px;height:48px;gap:2px;overflow-x:auto;
+}
+.nav-brand{display:flex;align-items:center;gap:8px;margin-right:20px;flex-shrink:0;}
+.nav-logo{width:26px;height:26px;border-radius:5px;background:linear-gradient(135deg,var(--amber),#b45309);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;}
+.nav-name{font-size:12px;font-weight:700;color:var(--amber);}
+.nb{padding:0 14px;height:48px;border:none;background:none;font-family:var(--font);font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.nb.active{color:var(--amber);border-bottom-color:var(--amber);}
+.nb:hover{color:var(--text);}
+
+.page{display:none;padding:24px 20px 60px;max-width:1300px;margin:0 auto;}
+.page.active{display:block;}
+
+.ph{margin-bottom:24px;}
+.ptag{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:2px;padding:3px 10px;border-radius:3px;margin-bottom:10px;}
+.ta{background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.3);}
+.tb{background:rgba(56,189,248,0.1);color:var(--blue);border:1px solid rgba(56,189,248,0.3);}
+.tg{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.3);}
+.tr{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.3);}
+.tp{background:rgba(167,139,250,0.1);color:var(--purple);border:1px solid rgba(167,139,250,0.3);}
+.ptitle{font-size:24px;font-weight:700;margin-bottom:4px;}
+.psub{font-size:13px;color:var(--muted);line-height:1.7;max-width:760px;}
+
+.dw{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.dt{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;font-weight:600;}
+
+.callout{border-radius:8px;padding:16px 20px;margin-bottom:16px;border-left:4px solid;}
+.ca{background:rgba(245,158,11,0.06);border-color:var(--amber);}
+.cb{background:rgba(56,189,248,0.06);border-color:var(--blue);}
+.cg{background:rgba(52,211,153,0.06);border-color:var(--green);}
+.cr{background:rgba(248,113,113,0.06);border-color:var(--red);}
+.cp{background:rgba(167,139,250,0.06);border-color:var(--purple);}
+.callout-title{font-size:10px;font-weight:700;letter-spacing:1px;font-family:var(--mono);margin-bottom:6px;}
+.callout-text{font-size:12px;color:var(--muted);line-height:1.7;}
+
+.code{background:var(--s);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:var(--mono);font-size:10.5px;line-height:1.9;overflow-x:auto;color:var(--muted);white-space:pre;margin:8px 0;}
+.kw{color:var(--amber);} .str{color:var(--green);} .cmt{color:var(--dim);font-style:italic;}
+.cls{color:var(--blue);} .ann{color:var(--purple);} .num{color:var(--oracle);}
+
+/* Three-column IPO layout */
+.ipo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:16px;}
+.ipo-col{padding:20px;}
+.ipo-col:nth-child(1){background:rgba(56,189,248,0.05);border-right:1px solid var(--border);}
+.ipo-col:nth-child(2){background:rgba(245,158,11,0.05);border-right:1px solid var(--border);}
+.ipo-col:nth-child(3){background:rgba(52,211,153,0.05);}
+.ipo-label{font-family:var(--mono);font-size:9px;letter-spacing:3px;font-weight:700;margin-bottom:8px;}
+.ipo-title{font-size:16px;font-weight:700;margin-bottom:14px;}
+.ipo-items{display:flex;flex-direction:column;gap:8px;}
+.ipo-item{background:var(--s);border-radius:6px;padding:10px 12px;border-left:3px solid;}
+.ipo-item-name{font-size:11px;font-weight:700;margin-bottom:3px;}
+.ipo-item-desc{font-size:10px;color:var(--muted);line-height:1.5;}
+.ipo-item-type{font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:4px;letter-spacing:0.5px;}
+
+/* Input detail cards */
+.input-card{background:var(--s);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;}
+.ic-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ic-num{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;}
+.ic-title{font-size:13px;font-weight:700;}
+.ic-subtitle{font-size:10px;color:var(--muted);margin-top:1px;}
+.ic-body{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px;}
+.ic-required{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.ic-req-item{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;border:1px solid;}
+.ic-mandatory{background:rgba(248,113,113,0.08);color:var(--red);border-color:rgba(248,113,113,0.3);}
+.ic-optional{background:rgba(245,158,11,0.08);color:var(--amber);border-color:rgba(245,158,11,0.3);}
+
+/* Process steps */
+.process-flow{display:flex;flex-direction:column;gap:0;}
+.pf-step{display:flex;gap:0;position:relative;}
+.pf-left{display:flex;flex-direction:column;align-items:center;width:48px;flex-shrink:0;}
+.pf-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;z-index:2;flex-shrink:0;}
+.pf-line{flex:1;width:2px;margin:0 auto;}
+.pf-step:last-child .pf-line{display:none;}
+.pf-content{flex:1;margin-left:10px;margin-bottom:10px;}
+.pf-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.pf-stage{font-size:12px;font-weight:700;}
+.pf-owner{font-family:var(--mono);font-size:9px;color:var(--muted);background:var(--dim);padding:2px 6px;border-radius:3px;}
+.pf-desc{background:var(--s);border:1px solid var(--border);border-radius:7px;padding:12px 14px;font-size:11px;color:var(--muted);line-height:1.6;}
+.pf-decision{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
+.pf-dec{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;}
+
+/* Output cards */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.out-card{background:var(--s);border:1px solid rgba(52,211,153,0.2);border-radius:10px;padding:16px;border-top:3px solid var(--green);}
+.out-title{font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;}
+.out-type{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:8px;letter-spacing:0.5px;}
+.out-desc{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:8px;}
+.out-example{font-family:var(--mono);font-size:9.5px;color:var(--teal);background:var(--bg);border-radius:4px;padding:8px;line-height:1.7;}
+
+/* YAML block */
+.yaml-block{background:var(--s);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:10px 0;}
+.yaml-header{background:var(--dim);padding:8px 12px;display:flex;align-items:center;gap:8px;}
+.yaml-filename{font-family:var(--mono);font-size:10px;color:var(--amber);}
+.yaml-badge{font-family:var(--mono);font-size:8px;padding:1px 6px;border-radius:2px;}
+.yaml-body{padding:14px;font-family:var(--mono);font-size:10.5px;line-height:1.9;color:var(--muted);white-space:pre;overflow-x:auto;}
+.y-key{color:var(--amber);} .y-val{color:var(--green);} .y-cmt{color:var(--dim);font-style:italic;}
+.y-section{color:var(--blue);font-weight:600;} .y-num{color:var(--oracle);}
+
+/* Tbl */
+.tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.tbl th{text-align:left;padding:9px 12px;background:var(--s);color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6;}
+.tbl tr:last-child td{border:none;}
+
+/* Big flow diagram */
+.big-flow{display:flex;align-items:center;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:16px;}
+.bf-box{flex:1;padding:16px 12px;text-align:center;position:relative;border-right:1px solid var(--border);}
+.bf-box:last-child{border-right:none;}
+.bf-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+.bf-title{font-size:12px;font-weight:700;margin-bottom:4px;}
+.bf-items{font-size:9.5px;color:var(--muted);line-height:1.7;}
+.bf-arrow{position:absolute;right:-10px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;z-index:2;}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">A</div>
+    <div class="nav-name">ACES SDD — CI/CD Auto-Fix</div>
+  </div>
+  <button class="nb active" onclick="show('overview',this)">Overview</button>
+  <button class="nb" onclick="show('input',this)">Input (What You Give)</button>
+  <button class="nb" onclick="show('process',this)">Process (What SDD Does)</button>
+  <button class="nb" onclick="show('output',this)">Output (What You Get)</button>
+  <button class="nb" onclick="show('spec',this)">The Full Spec</button>
+  <button class="nb" onclick="show('jules',this)">Jules Integration</button>
+</div>
+
+<!-- ══ OVERVIEW ══ -->
+<div class="page active" id="pg-overview">
+  <div class="ph">
+    <span class="ptag ta">SDD FRAMEWORK — CI/CD AUTO-FIX USE CASE</span>
+    <div class="ptitle">Input → Process → Output</div>
+    <div class="psub">SDD is a compiler. You give it a specification. It produces working code. Here is exactly what you need to provide, what SDD does with it, and what comes out the other end.</div>
+  </div>
+
+  <div class="callout ca">
+    <div class="callout-title">THE MENTAL MODEL</div>
+    <div class="callout-text">
+      Think of SDD like a senior engineer who has never worked at JPMC before.<br/><br/>
+      <strong>You must tell them:</strong> What problem to solve · What the system looks like · What tools exist · What rules to follow · What success looks like.<br/><br/>
+      <strong>You do NOT need to tell them:</strong> How to write a Spring Boot service · How to use Resilience4j · How to structure tests. They already know that — that is the SDD framework's job.
+    </div>
+  </div>
+
+  <!-- Big IPO summary -->
+  <div class="dw">
+    <div class="dt">INPUT → PROCESS → OUTPUT SUMMARY</div>
+    <div class="ipo-grid">
+      <div class="ipo-col">
+        <div class="ipo-label" style="color:var(--blue)">INPUT</div>
+        <div class="ipo-title" style="color:var(--blue)">What You Give SDD</div>
+        <div class="ipo-items">
+          <div class="ipo-item" style="border-color:var(--blue)">
+            <div class="ipo-item-name">1. Business Spec</div>
+            <div class="ipo-item-desc">What the system must do in business language. The problem it solves.</div>
+            <div class="ipo-item-type">YAML · Required · You write this</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--blue)">
+            <div class="ipo-item-name">2. Functional Spec</div>
+            <div class="ipo-item-desc">Services, agents, APIs, workflows. Input/output per component.</div>
+            <div class="ipo-item-type">YAML · Required · You write this</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--blue)">
+            <div class="ipo-item-name">3. Integration Spec</div>
+            <div class="ipo-item-desc">External systems. Jules CI/CD webhook format, Snyk payload shape, GitHub API.</div>
+            <div class="ipo-item-type">YAML · Required · You write this</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--blue)">
+            <div class="ipo-item-name">4. Policy Spec</div>
+            <div class="ipo-item-desc">ARIA risk rules. When to auto-fix, when to block, when to escalate.</div>
+            <div class="ipo-item-type">YAML · Required · You write this</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--blue)">
+            <div class="ipo-item-name">5. Architecture Spec</div>
+            <div class="ipo-item-desc">Stack, database, runtime. Java 21, Spring Boot, Oracle 23ai, Jules.</div>
+            <div class="ipo-item-type">YAML · Required · Already defined</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--amber)">
+            <div class="ipo-item-name">6. Test Spec</div>
+            <div class="ipo-item-desc">What test cases must pass. Happy path, BLOCK path, failure scenarios.</div>
+            <div class="ipo-item-type">YAML · Optional but recommended</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ipo-col">
+        <div class="ipo-label" style="color:var(--amber)">PROCESS</div>
+        <div class="ipo-title" style="color:var(--amber)">What SDD Does</div>
+        <div class="ipo-items">
+          <div class="ipo-item" style="border-color:var(--amber)">
+            <div class="ipo-item-name">1. Parse + Validate</div>
+            <div class="ipo-item-desc">Reads all spec YAML. Validates against JSON Schema. Rejects malformed specs before generating anything.</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--amber)">
+            <div class="ipo-item-name">2. Build IR</div>
+            <div class="ipo-item-desc">Converts YAML → Intermediate Representation. Strictly typed. No ambiguity. Same spec = same IR always.</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--amber)">
+            <div class="ipo-item-name">3. DAG Planning</div>
+            <div class="ipo-item-desc">Breaks IR into task graph. What to generate first. What depends on what. Parallel tasks identified.</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--amber)">
+            <div class="ipo-item-name">4. ARIA Validation</div>
+            <div class="ipo-item-desc">ARIA scores the spec for risk before generating any code. High-risk specs blocked.</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--amber)">
+            <div class="ipo-item-name">5. Code Generation</div>
+            <div class="ipo-item-desc">Freemarker templates + LLM. Generates Java classes, tests, configs, Flyway migrations.</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--amber)">
+            <div class="ipo-item-name">6. Validate + Fix</div>
+            <div class="ipo-item-desc">Compiles generated code. Runs tests. Feeds failures back to LLM. Auto-fix loop (max 3 iterations).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ipo-col">
+        <div class="ipo-label" style="color:var(--green)">OUTPUT</div>
+        <div class="ipo-title" style="color:var(--green)">What You Get</div>
+        <div class="ipo-items">
+          <div class="ipo-item" style="border-color:var(--green)">
+            <div class="ipo-item-name">1. Working Java Code</div>
+            <div class="ipo-item-desc">Complete Spring Boot classes. All packages correct. All annotations present. Compiles on first try.</div>
+            <div class="ipo-item-type">.java files · Ready for engineer review</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--green)">
+            <div class="ipo-item-name">2. Test Suite</div>
+            <div class="ipo-item-desc">JUnit 5 unit tests + integration tests. All test cases from your test spec generated and passing.</div>
+            <div class="ipo-item-type">*Test.java + *IT.java · mvn test passes</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--green)">
+            <div class="ipo-item-name">3. Oracle Schema</div>
+            <div class="ipo-item-desc">Flyway migrations for all new tables. VPD comment blocks. Oracle 23ai compatible DDL.</div>
+            <div class="ipo-item-type">V{n}__create_*.sql · Flyway-ready</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--green)">
+            <div class="ipo-item-name">4. Configuration</div>
+            <div class="ipo-item-desc">application.yml additions. Jules webhook config. Scanner credentials placeholders via Vault.</div>
+            <div class="ipo-item-type">.yml additions · Vault secret paths</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--green)">
+            <div class="ipo-item-name">5. Generation Report</div>
+            <div class="ipo-item-desc">What was generated. What assumptions were made. What the engineer must review. Risk flags.</div>
+            <div class="ipo-item-type">generation-report.md · For engineer review</div>
+          </div>
+          <div class="ipo-item" style="border-color:var(--teal)">
+            <div class="ipo-item-name">6. ARIA Plugin Registration</div>
+            <div class="ipo-item-desc">plugin.json for AutoFixAgent. Ready to register with ACES plugin registry on startup.</div>
+            <div class="ipo-item-type">plugin.json · Auto-registered on deploy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Big flow -->
+  <div class="dw">
+    <div class="dt">THE COMPLETE FLOW — JULES TRIGGER TO WORKING FIX</div>
+    <div class="big-flow">
+      <div class="bf-box" style="background:rgba(248,113,113,0.04);">
+        <div class="bf-label" style="color:var(--red)">TRIGGER</div>
+        <div class="bf-title" style="color:var(--red)">Jules CI/CD</div>
+        <div class="bf-items">Snyk scan fails<br/>Sonar gate fails<br/>Raven violation<br/>Build break</div>
+        <div class="bf-arrow" style="background:var(--red)">→</div>
+      </div>
+      <div class="bf-box" style="background:rgba(245,158,11,0.04);">
+        <div class="bf-label" style="color:var(--amber)">RECEIVE</div>
+        <div class="bf-title" style="color:var(--amber)">ACES Webhook</div>
+        <div class="bf-items">Parse Jules event<br/>Normalise signal<br/>Build ScanResultEvent<br/>Route to ARIA</div>
+        <div class="bf-arrow" style="background:var(--amber)">→</div>
+      </div>
+      <div class="bf-box" style="background:rgba(56,189,248,0.04);">
+        <div class="bf-label" style="color:var(--blue)">GOVERN</div>
+        <div class="bf-title" style="color:var(--blue)">ARIA</div>
+        <div class="bf-items">Check agent trust<br/>Check file risk<br/>Check fix type<br/>Decide: allow/block</div>
+        <div class="bf-arrow" style="background:var(--blue)">→</div>
+      </div>
+      <div class="bf-box" style="background:rgba(52,211,153,0.04);">
+        <div class="bf-label" style="color:var(--green)">FIX</div>
+        <div class="bf-title" style="color:var(--green)">AutoFixAgent</div>
+        <div class="bf-items">Read failing file<br/>Spring AI generates fix<br/>Validate fix compiles<br/>Capture reasoning</div>
+        <div class="bf-arrow" style="background:var(--green)">→</div>
+      </div>
+      <div class="bf-box" style="background:rgba(167,139,250,0.04);">
+        <div class="bf-label" style="color:var(--purple)">CLOSE LOOP</div>
+        <div class="bf-title" style="color:var(--purple)">Git + Jules</div>
+        <div class="bf-items">Commit fix to branch<br/>Add PR comment<br/>Retrigger Jules build<br/>Engineer gets Slack</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INPUT ══ -->
+<div class="page" id="pg-input">
+  <div class="ph">
+    <span class="ptag tb">INPUT — WHAT YOU GIVE SDD</span>
+    <div class="ptitle">The 6 Specification Files You Must Write</div>
+    <div class="psub">These are the inputs SDD needs to generate the CI/CD auto-fix module. Each is a YAML file. Together they form the complete spec that SDD compiles into working code.</div>
+  </div>
+
+  <div class="callout cb">
+    <div class="callout-title">THE GOLDEN RULE FOR INPUTS</div>
+    <div class="callout-text">Be specific about WHAT and WHY. Never tell SDD HOW. The moment you start saying "use a HashMap here" or "write a for loop" you are fighting the framework. Tell SDD what behaviour you need. It decides the implementation. Your job is domain knowledge. SDD's job is code.</div>
+  </div>
+
+  <!-- Input 1: Business Spec -->
+  <div class="input-card">
+    <div class="ic-header">
+      <div class="ic-num" style="background:rgba(56,189,248,0.1);color:var(--blue)">1</div>
+      <div>
+        <div class="ic-title">Business Specification</div>
+        <div class="ic-subtitle">What problem are we solving · Who benefits · What does success look like</div>
+      </div>
+    </div>
+    <div class="ic-body">This tells SDD the business context. Without this, generated code solves a technical problem but may not solve the actual business problem. SDD uses this to name things correctly, write meaningful comments, and generate accurate error messages.</div>
+    <div class="ic-required">
+      <span class="ic-req-item ic-mandatory">goal — mandatory</span>
+      <span class="ic-req-item ic-mandatory">users — mandatory</span>
+      <span class="ic-req-item ic-mandatory">constraints — mandatory</span>
+      <span class="ic-req-item ic-optional">success_metrics — recommended</span>
+      <span class="ic-req-item ic-optional">non_goals — recommended</span>
+    </div>
+
+    <div class="yaml-block" style="margin-top:12px;">
+      <div class="yaml-header">
+        <span class="yaml-filename">01-business-spec.yaml</span>
+        <span class="yaml-badge" style="background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);">MANDATORY</span>
+      </div>
+      <div class="yaml-body"><span class="y-section">version:</span> <span class="y-val">"1.0"</span>
+<span class="y-section">spec_type:</span> <span class="y-val">business</span>
+
+<span class="y-section">goal:</span> <span class="y-cmt"># What problem does this solve?</span>
+  <span class="y-key">primary:</span> <span class="y-val">"When Jules CI/CD pipeline fails due to a scanner finding (Snyk,
+           SonarQube, Raven), ACES automatically analyses the issue,
+           generates a targeted fix, commits it to the failing branch,
+           and retriggers the build — without any engineer involvement."</span>
+
+  <span class="y-key">problem_today:</span> <span class="y-val">"Engineers receive scanner alerts, manually read the report,
+                 understand the fix, change the code, commit, and
+                 wait for the pipeline to re-run. This takes 20-60
+                 minutes per issue and is often deprioritised."</span>
+
+  <span class="y-key">value:</span> <span class="y-val">"Reduces mean-time-to-fix for scanner issues from 45 minutes
+        to under 3 minutes. Engineers review instead of fix."</span>
+
+<span class="y-section">users:</span>
+  <span class="y-key">primary:</span> <span class="y-val">JPMorgan Chase software engineers using Jules CI/CD</span>
+  <span class="y-key">secondary:</span> <span class="y-val">Engineering leads reviewing auto-fix commits</span>
+  <span class="y-key">oversight:</span> <span class="y-val">Security / CISO team auditing auto-fix decisions</span>
+
+<span class="y-section">constraints:</span>
+  <span class="y-key">compliance:</span> [<span class="y-val">JPMC-INTERNAL-POLICY</span>, <span class="y-val">SOX-AUDIT</span>]
+  <span class="y-key">fix_must_not_break_build:</span> <span class="y-val">true</span>
+  <span class="y-key">every_fix_must_be_auditable:</span> <span class="y-val">true</span>
+  <span class="y-key">no_fix_without_aria_approval:</span> <span class="y-val">true</span>
+  <span class="y-key">max_fix_time_seconds:</span> <span class="y-num">180</span>
+
+<span class="y-section">success_metrics:</span>
+  <span class="y-key">mean_time_to_fix:</span> <span class="y-val">"under 3 minutes from Jules webhook to fixed build"</span>
+  <span class="y-key">fix_accuracy:</span> <span class="y-val">"fixed build passes same scanner that triggered the fix"</span>
+  <span class="y-key">false_fix_rate:</span> <span class="y-val">"less than 5% of auto-fixes break the build"</span>
+  <span class="y-key">audit_coverage:</span> <span class="y-val">"100% of auto-fix actions recorded in Oracle audit log"</span>
+
+<span class="y-section">non_goals:</span>
+  <span class="y-key">-</span> <span class="y-val">"Auto-fixing security architecture decisions"</span>
+  <span class="y-key">-</span> <span class="y-val">"Modifying authentication or authorisation code"</span>
+  <span class="y-key">-</span> <span class="y-val">"Touching payment processing code without human approval"</span>
+  <span class="y-key">-</span> <span class="y-val">"Running without ARIA governance"</span></div>
+    </div>
+  </div>
+
+  <!-- Input 2: Functional Spec -->
+  <div class="input-card">
+    <div class="ic-header">
+      <div class="ic-num" style="background:rgba(245,158,11,0.1);color:var(--amber)">2</div>
+      <div>
+        <div class="ic-title">Functional Specification</div>
+        <div class="ic-subtitle">Services, agents, APIs, workflows — input and output per component</div>
+      </div>
+    </div>
+    <div class="ic-body">This is the core spec. It tells SDD what services to generate, what each service does, and how they connect. This is where most of your thinking goes. Be specific about inputs and outputs. SDD generates the implementation from this.</div>
+
+    <div class="yaml-block" style="margin-top:12px;">
+      <div class="yaml-header">
+        <span class="yaml-filename">02-functional-spec.yaml</span>
+        <span class="yaml-badge" style="background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);">MANDATORY</span>
+      </div>
+      <div class="yaml-body"><span class="y-section">version:</span> <span class="y-val">"1.0"</span>
+<span class="y-section">spec_type:</span> <span class="y-val">functional</span>
+
+<span class="y-section">services:</span>
+
+  <span class="y-key">- name:</span> <span class="y-val">ScanResultWebhookReceiver</span>
+    <span class="y-key">type:</span> <span class="y-val">webhook-receiver</span>
+    <span class="y-key">module:</span> <span class="y-val">aces-api</span>
+    <span class="y-key">purpose:</span> <span class="y-val">"Receives scanner webhooks from Jules CI/CD pipeline.
+              Validates signature. Normalises to ScanResultEvent."</span>
+    <span class="y-key">input:</span>
+      <span class="y-key">source:</span> <span class="y-val">HTTP POST webhook from Jules</span>
+      <span class="y-key">format:</span> <span class="y-val">JSON — varies per scanner (see integration-spec.yaml)</span>
+      <span class="y-key">authentication:</span> <span class="y-val">HMAC-SHA256 signature in X-Hub-Signature-256 header</span>
+    <span class="y-key">output:</span>
+      <span class="y-key">type:</span> <span class="y-val">ScanResultEvent (internal record)</span>
+      <span class="y-key">destination:</span> <span class="y-val">AutoFixOrchestrator (async)</span>
+      <span class="y-key">response_to_caller:</span> <span class="y-val">202 Accepted immediately — processing is async</span>
+    <span class="y-key">error_cases:</span>
+      <span class="y-key">invalid_signature:</span> <span class="y-val">401 Unauthorized — log attempt</span>
+      <span class="y-key">malformed_payload:</span> <span class="y-val">400 Bad Request — log and discard</span>
+      <span class="y-key">unknown_scanner:</span> <span class="y-val">422 Unprocessable — log scanner name</span>
+
+  <span class="y-key">- name:</span> <span class="y-val">AutoFixOrchestrator</span>
+    <span class="y-key">type:</span> <span class="y-val">service</span>
+    <span class="y-key">module:</span> <span class="y-val">aces-core</span>
+    <span class="y-key">purpose:</span> <span class="y-val">"Coordinates the full auto-fix lifecycle. Calls ARIA.
+              Routes to AutoFixAgent. Commits fix. Notifies engineer."</span>
+    <span class="y-key">input:</span>
+      <span class="y-key">type:</span> <span class="y-val">ScanResultEvent</span>
+    <span class="y-key">steps:</span>
+      <span class="y-key">1:</span> <span class="y-val">call ARIA risk evaluator → get AriaDecision</span>
+      <span class="y-key">2:</span> <span class="y-val">if BLOCK → notify engineer via Slack, log to Oracle, return</span>
+      <span class="y-key">3:</span> <span class="y-val">if REQUIRES_APPROVAL → create JIRA ticket, wait for approval</span>
+      <span class="y-key">4:</span> <span class="y-val">if ALLOW/WARN → build AgentRequest, call AutoFixAgent</span>
+      <span class="y-key">5:</span> <span class="y-val">validate AgentResponse.agentReasoning is not null/blank</span>
+      <span class="y-key">6:</span> <span class="y-val">commit fix to branch via GitCommitService</span>
+      <span class="y-key">7:</span> <span class="y-val">add PR comment with fix description and reasoning</span>
+      <span class="y-key">8:</span> <span class="y-val">retrigger Jules build for this PR</span>
+      <span class="y-key">9:</span> <span class="y-val">send Slack to engineer: what was fixed and commit SHA</span>
+      <span class="y-key">10:</span> <span class="y-val">publish ExecutionRecord to ARIA via Oracle AQ (async)</span>
+    <span class="y-key">output:</span>
+      <span class="y-key">type:</span> <span class="y-val">AutoFixResult (status, commitSha, reasoning, filesChanged)</span>
+      <span class="y-key">logged_to:</span> <span class="y-val">Oracle ACES_AUTOFIX_LOG (always — success and failure)</span>
+
+<span class="y-section">agents:</span>
+
+  <span class="y-key">- name:</span> <span class="y-val">AutoFixAgent</span>
+    <span class="y-key">type:</span> <span class="y-val">agent</span>
+    <span class="y-key">implements:</span> <span class="y-val">AgentPlugin</span>
+    <span class="y-key">model:</span> <span class="y-val">claude-sonnet (primary), gpt-4o (fallback)</span>
+    <span class="y-key">tools:</span>
+      <span class="y-key">-</span> <span class="y-val">read-file: read content of affected file from git branch</span>
+      <span class="y-key">-</span> <span class="y-val">validate-syntax: verify generated fix compiles/parses</span>
+    <span class="y-key">input:</span>
+      <span class="y-key">type:</span> <span class="y-val">AgentRequest (with ScanResultEvent in context.metadata)</span>
+      <span class="y-key">required_context:</span>
+        <span class="y-key">-</span> <span class="y-val">affected file content (fetched from git)</span>
+        <span class="y-key">-</span> <span class="y-val">issue description from scanner</span>
+        <span class="y-key">-</span> <span class="y-val">recommended fix from scanner (if available)</span>
+        <span class="y-key">-</span> <span class="y-val">ARIA trust score and active constraints</span>
+    <span class="y-key">output:</span>
+      <span class="y-key">type:</span> <span class="y-val">AgentResponse</span>
+      <span class="y-key">required_fields:</span>
+        <span class="y-key">fixed_file_content:</span> <span class="y-val">complete file with fix applied (in artifacts)</span>
+        <span class="y-key">agentReasoning:</span> <span class="y-val">MANDATORY — what was changed and why (never null)</span>
+        <span class="y-key">confidence:</span> <span class="y-val">0.0-1.0 — how confident agent is in the fix</span>
+    <span class="y-key">constraints:</span>
+      <span class="y-key">-</span> <span class="y-val">minimum change only — do not refactor unrelated code</span>
+      <span class="y-key">-</span> <span class="y-val">preserve existing formatting and comments</span>
+      <span class="y-key">-</span> <span class="y-val">if confidence below 0.7 — set status FAILED, do not commit</span>
+      <span class="y-key">-</span> <span class="y-val">respect all AriaContext.activeConstraints</span></div>
+    </div>
+  </div>
+
+  <!-- Input 3: Integration Spec -->
+  <div class="input-card">
+    <div class="ic-header">
+      <div class="ic-num" style="background:rgba(251,146,60,0.1);color:var(--oracle)">3</div>
+      <div>
+        <div class="ic-title">Integration Specification</div>
+        <div class="ic-subtitle">Jules webhook format · Scanner payloads · GitHub API · Slack · JIRA</div>
+      </div>
+    </div>
+    <div class="ic-body">This is the most important spec for the CI/CD use case. SDD needs to know the exact shape of Jules webhooks, Snyk payloads, and GitHub API calls. Without this, the generated webhook mappers will be wrong. You know your systems — SDD does not.</div>
+
+    <div class="yaml-block" style="margin-top:12px;">
+      <div class="yaml-header">
+        <span class="yaml-filename">03-integration-spec.yaml</span>
+        <span class="yaml-badge" style="background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);">MANDATORY — Most Critical</span>
+      </div>
+      <div class="yaml-body"><span class="y-section">version:</span> <span class="y-val">"1.0"</span>
+<span class="y-section">spec_type:</span> <span class="y-val">integration</span>
+
+<span class="y-section">ci_cd:</span>
+  <span class="y-key">platform:</span> <span class="y-val">Jules</span>
+  <span class="y-key">description:</span> <span class="y-val">"Jules is a JPMC internal wrapper on top of Jenkins.
+                It sends webhook events when pipeline stages complete."</span>
+  <span class="y-key">webhook_url:</span> <span class="y-val">POST /api/v1/webhooks/jules</span>
+  <span class="y-key">auth_header:</span> <span class="y-val">X-Jules-Signature (HMAC-SHA256)</span>
+  <span class="y-key">secret_source:</span> <span class="y-val">Vault at secret/aces/jules/webhook-secret</span>
+
+  <span class="y-key">event_payload_example:</span> <span class="y-cmt"># FILL IN EXACT JULES PAYLOAD FORMAT</span>
+    <span class="y-key">event_type:</span> <span class="y-val">STAGE_FAILED</span>
+    <span class="y-key">pipeline_id:</span> <span class="y-val">jpmc-pipeline-12345</span>
+    <span class="y-key">job_name:</span> <span class="y-val">security-scan</span>
+    <span class="y-key">branch:</span> <span class="y-val">feature/PROJ-123-new-feature</span>
+    <span class="y-key">repo:</span> <span class="y-val">jpmc/payment-service</span>
+    <span class="y-key">pr_id:</span> <span class="y-val">PR-4821</span>
+    <span class="y-key">commit_sha:</span> <span class="y-val">abc123def456</span>
+    <span class="y-key">scanner_results_url:</span> <span class="y-val">https://jules.jpmc.internal/builds/12345/scanner-results</span>
+    <span class="y-cmt">    # SDD NOTE: Add actual Jules payload fields here — team must verify</span>
+
+<span class="y-section">scanners:</span>
+
+  <span class="y-key">- name:</span> <span class="y-val">snyk</span>
+    <span class="y-key">webhook_path:</span> <span class="y-val">/api/v1/webhooks/snyk</span>
+    <span class="y-key">auth:</span> <span class="y-val">HMAC-SHA256 in X-Hub-Signature-256</span>
+    <span class="y-key">issue_types_handled:</span>
+      <span class="y-key">-</span> <span class="y-val">VULNERABILITY (dependency version bump)</span>
+      <span class="y-key">-</span> <span class="y-val">VULNERABILITY (code pattern fix)</span>
+    <span class="y-key">payload_fields:</span>
+      <span class="y-key">issue_id:</span> <span class="y-val">$.newIssues[0].id</span>
+      <span class="y-key">severity:</span> <span class="y-val">$.newIssues[0].issueData.severity (uppercase)</span>
+      <span class="y-key">description:</span> <span class="y-val">$.newIssues[0].issueData.title</span>
+      <span class="y-key">affected_package:</span> <span class="y-val">$.newIssues[0].pkgName</span>
+      <span class="y-key">affected_version:</span> <span class="y-val">$.newIssues[0].pkgVersions[0]</span>
+      <span class="y-key">recommended_fix:</span> <span class="y-val">$.newIssues[0].issueData.fixedIn[0]</span>
+      <span class="y-key">repo_name:</span> <span class="y-val">$.project.name</span>
+      <span class="y-key">branch:</span> <span class="y-val">$.project.branch</span>
+
+  <span class="y-key">- name:</span> <span class="y-val">sonarqube</span>
+    <span class="y-key">webhook_path:</span> <span class="y-val">/api/v1/webhooks/sonar</span>
+    <span class="y-key">auth:</span> <span class="y-val">Sonar-generated secret in X-Sonar-Webhook-HMAC-SHA256</span>
+    <span class="y-key">issue_types_handled:</span>
+      <span class="y-key">-</span> <span class="y-val">BUG</span>
+      <span class="y-key">-</span> <span class="y-val">CODE_SMELL</span>
+      <span class="y-key">-</span> <span class="y-val">SECURITY_HOTSPOT</span>
+    <span class="y-key">payload_fields:</span>
+      <span class="y-key">issue_id:</span> <span class="y-val">$.issues[0].key</span>
+      <span class="y-key">severity:</span> <span class="y-val">$.issues[0].severity</span>
+      <span class="y-key">description:</span> <span class="y-val">$.issues[0].message</span>
+      <span class="y-key">affected_file:</span> <span class="y-val">$.issues[0].component (strip project prefix)</span>
+      <span class="y-key">affected_line:</span> <span class="y-val">$.issues[0].line</span>
+      <span class="y-key">rule_id:</span> <span class="y-val">$.issues[0].rule</span>
+      <span class="y-key">project_key:</span> <span class="y-val">$.project.key</span>
+
+  <span class="y-key">- name:</span> <span class="y-val">raven</span>
+    <span class="y-key">webhook_path:</span> <span class="y-val">/api/v1/webhooks/raven</span>
+    <span class="y-key">auth:</span> <span class="y-val">JPMC internal token — team to confirm format</span>
+    <span class="y-key">payload_fields:</span> <span class="y-cmt"># TEAM MUST PROVIDE ACTUAL RAVEN PAYLOAD FORMAT</span>
+      <span class="y-key">issue_id:</span> <span class="y-val">TBD — check Raven documentation</span>
+      <span class="y-key">severity:</span> <span class="y-val">TBD</span>
+      <span class="y-key">affected_file:</span> <span class="y-val">TBD</span>
+
+<span class="y-section">git_provider:</span>
+  <span class="y-key">platform:</span> <span class="y-val">GitHub Enterprise (JPMC internal)</span>
+  <span class="y-key">base_url:</span> <span class="y-val">${GITHUB_BASE_URL} — from Vault</span>
+  <span class="y-key">auth:</span> <span class="y-val">Bearer token — from Vault at secret/aces/github/token</span>
+  <span class="y-key">operations_needed:</span>
+    <span class="y-key">-</span> <span class="y-val">GET file content from branch</span>
+    <span class="y-key">-</span> <span class="y-val">PUT updated file content to branch (creates commit)</span>
+    <span class="y-key">-</span> <span class="y-val">POST comment to PR</span>
+
+<span class="y-section">notifications:</span>
+  <span class="y-key">slack:</span>
+    <span class="y-key">webhook_url:</span> <span class="y-val">${SLACK_WEBHOOK_URL} — from Vault</span>
+    <span class="y-key">channel:</span> <span class="y-val">#aces-autofix-notifications</span>
+    <span class="y-key">notify_on:</span> [<span class="y-val">FIXED</span>, <span class="y-val">BLOCKED</span>, <span class="y-val">FAILED</span>, <span class="y-val">ESCALATED</span>]
+  <span class="y-key">jira:</span>
+    <span class="y-key">base_url:</span> <span class="y-val">${JIRA_BASE_URL} — from Vault</span>
+    <span class="y-key">project_key:</span> <span class="y-val">ACES</span>
+    <span class="y-key">issue_type:</span> <span class="y-val">Task</span>
+    <span class="y-key">create_ticket_on:</span> [<span class="y-val">REQUIRES_APPROVAL</span>, <span class="y-val">BLOCKED</span>]</div>
+    </div>
+  </div>
+
+  <!-- Input 4: Policy Spec -->
+  <div class="input-card">
+    <div class="ic-header">
+      <div class="ic-num" style="background:rgba(56,189,248,0.1);color:var(--blue)">4</div>
+      <div>
+        <div class="ic-title">Policy Specification</div>
+        <div class="ic-subtitle">ARIA risk rules — when to auto-fix, block, or escalate</div>
+      </div>
+    </div>
+    <div class="ic-body">This tells ARIA what decisions to make. These are your business rules. SDD generates the PolicyEvaluationService and all rule logic from this spec. Every rule you add here is a generated enforcement point.</div>
+
+    <div class="yaml-block" style="margin-top:12px;">
+      <div class="yaml-header">
+        <span class="yaml-filename">04-policy-spec.yaml</span>
+        <span class="yaml-badge" style="background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);">MANDATORY</span>
+      </div>
+      <div class="yaml-body"><span class="y-section">version:</span> <span class="y-val">"1.0"</span>
+<span class="y-section">spec_type:</span> <span class="y-val">policy</span>
+<span class="y-section">applies_to:</span> <span class="y-val">AutoFixOrchestrator</span>
+
+<span class="y-section">block_rules:</span> <span class="y-cmt"># ARIA returns BLOCK — no auto-fix under any circumstances</span>
+  <span class="y-key">- id:</span> <span class="y-val">BLOCK-001</span>
+    <span class="y-key">name:</span> <span class="y-val">auth_file_protected</span>
+    <span class="y-key">condition:</span> <span class="y-val">"affected_file matches any of: SecurityConfig.java,
+               JwtAuthFilter.java, OAuthConfig.java, **/auth/**"</span>
+    <span class="y-key">reason:</span> <span class="y-val">"Authentication files require security architect review"</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">BLOCK-002</span>
+    <span class="y-key">name:</span> <span class="y-val">payment_file_protected</span>
+    <span class="y-key">condition:</span> <span class="y-val">"affected_file matches any of: **/payment/**, **/ledger/**,
+               **/transaction/**"</span>
+    <span class="y-key">reason:</span> <span class="y-val">"Payment code changes require human review per JPMC policy"</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">BLOCK-003</span>
+    <span class="y-key">name:</span> <span class="y-val">low_trust_agent</span>
+    <span class="y-key">condition:</span> <span class="y-val">"agent.trustScore < 0.50"</span>
+    <span class="y-key">reason:</span> <span class="y-val">"Agent trust too low for autonomous fix"</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">BLOCK-004</span>
+    <span class="y-key">name:</span> <span class="y-val">large_file_protected</span>
+    <span class="y-key">condition:</span> <span class="y-val">"affected_file.size > 500KB OR affected_file.isBinary"</span>
+    <span class="y-key">reason:</span> <span class="y-val">"File too large or binary — auto-fix not safe"</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">BLOCK-005</span>
+    <span class="y-key">name:</span> <span class="y-val">production_config_protected</span>
+    <span class="y-key">condition:</span> <span class="y-val">"affected_file matches: application-prod.yml,
+               application-production.*, **/prod/**"</span>
+    <span class="y-key">reason:</span> <span class="y-val">"Production config changes require manual review"</span>
+
+<span class="y-section">approval_rules:</span> <span class="y-cmt"># ARIA returns REQUIRES_APPROVAL — fix staged, human must approve</span>
+  <span class="y-key">- id:</span> <span class="y-val">APPROVE-001</span>
+    <span class="y-key">name:</span> <span class="y-val">critical_security_hotspot</span>
+    <span class="y-key">condition:</span> <span class="y-val">"severity == CRITICAL AND issue_type == SECURITY_HOTSPOT"</span>
+    <span class="y-key">approver_role:</span> <span class="y-val">security-architect</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">APPROVE-002</span>
+    <span class="y-key">name:</span> <span class="y-val">medium_trust_agent_high_severity</span>
+    <span class="y-key">condition:</span> <span class="y-val">"agent.trustScore BETWEEN 0.50 AND 0.70 AND severity IN [HIGH, CRITICAL]"</span>
+    <span class="y-key">approver_role:</span> <span class="y-val">engineering-lead</span>
+
+<span class="y-section">allow_rules:</span> <span class="y-cmt"># ARIA returns ALLOW — proceed with auto-fix</span>
+  <span class="y-key">- id:</span> <span class="y-val">ALLOW-001</span>
+    <span class="y-key">name:</span> <span class="y-val">dependency_version_bump</span>
+    <span class="y-key">condition:</span> <span class="y-val">"issue_type == VULNERABILITY AND fix_type == DEPENDENCY_UPGRADE
+               AND agent.trustScore >= 0.70"</span>
+    <span class="y-key">note:</span> <span class="y-val">"Upgrading a dependency version is low-risk and well-understood"</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">ALLOW-002</span>
+    <span class="y-key">name:</span> <span class="y-val">low_severity_code_smell</span>
+    <span class="y-key">condition:</span> <span class="y-val">"issue_type IN [CODE_SMELL, BUG] AND severity IN [LOW, MEDIUM]
+               AND agent.trustScore >= 0.65"</span>
+
+<span class="y-section">default_rule:</span>
+  <span class="y-key">action:</span> <span class="y-val">REQUIRES_APPROVAL</span>
+  <span class="y-key">reason:</span> <span class="y-val">"No matching allow rule — default to human review"</span></div>
+    </div>
+  </div>
+
+  <!-- Input 5: Architecture Spec -->
+  <div class="input-card">
+    <div class="ic-header">
+      <div class="ic-num" style="background:rgba(52,211,153,0.1);color:var(--green)">5</div>
+      <div>
+        <div class="ic-title">Architecture Specification</div>
+        <div class="ic-subtitle">Stack, database, runtime — already 90% defined for ACES</div>
+      </div>
+    </div>
+    <div class="ic-body">For ACES this is mostly already decided. You reference the platform architecture and add only the CI/CD-specific additions. SDD uses this to generate correct imports, database dialects, and framework-specific code.</div>
+
+    <div class="yaml-block" style="margin-top:12px;">
+      <div class="yaml-header">
+        <span class="yaml-filename">05-architecture-spec.yaml</span>
+        <span class="yaml-badge" style="background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3);">MOSTLY INHERITED</span>
+      </div>
+      <div class="yaml-body"><span class="y-section">version:</span> <span class="y-val">"1.0"</span>
+<span class="y-section">spec_type:</span> <span class="y-val">architecture</span>
+<span class="y-section">extends:</span> <span class="y-val">aces-platform-architecture-v1</span> <span class="y-cmt"># inherits all ACES platform decisions</span>
+
+<span class="y-section">runtime:</span>
+  <span class="y-key">language:</span> <span class="y-val">java-21</span>
+  <span class="y-key">framework:</span> <span class="y-val">spring-boot-3.3</span>
+  <span class="y-key">ai_framework:</span> <span class="y-val">spring-ai-1.x</span>
+  <span class="y-key">module:</span> <span class="y-val">aces-core (autofix package) + aces-api (webhook package)</span>
+
+<span class="y-section">database:</span>
+  <span class="y-key">type:</span> <span class="y-val">oracle-23ai</span>
+  <span class="y-key">location:</span> <span class="y-val">JPMC private cloud</span>
+  <span class="y-key">connection:</span> <span class="y-val">direct JDBC — no wallet</span>
+  <span class="y-key">new_tables:</span>
+    <span class="y-key">-</span> <span class="y-val">ACES_AUTOFIX_LOG</span>
+
+<span class="y-section">new_dependencies:</span> <span class="y-cmt"># additions to parent pom.xml for this use case</span>
+  <span class="y-key">-</span> <span class="y-val">spring-boot-starter-integration (for async webhook processing)</span>
+  <span class="y-key">-</span> <span class="y-val">commons-codec (HMAC-SHA256 signature validation)</span>
+  <span class="y-key">-</span> <span class="y-val">spring-retry (for GitHub API retry on rate limit)</span>
+
+<span class="y-section">new_vault_secrets:</span>
+  <span class="y-key">-</span> <span class="y-val">secret/aces/jules/webhook-secret</span>
+  <span class="y-key">-</span> <span class="y-val">secret/aces/snyk/webhook-secret</span>
+  <span class="y-key">-</span> <span class="y-val">secret/aces/sonar/webhook-secret</span>
+  <span class="y-key">-</span> <span class="y-val">secret/aces/raven/webhook-secret</span>
+  <span class="y-key">-</span> <span class="y-val">secret/aces/github/api-token</span>
+  <span class="y-key">-</span> <span class="y-val">secret/aces/slack/webhook-url</span>
+  <span class="y-key">-</span> <span class="y-val">secret/aces/jira/api-token</span></div>
+    </div>
+  </div>
+
+  <!-- Input 6: Test Spec -->
+  <div class="input-card">
+    <div class="ic-header">
+      <div class="ic-num" style="background:rgba(167,139,250,0.1);color:var(--purple)">6</div>
+      <div>
+        <div class="ic-title">Test Specification</div>
+        <div class="ic-subtitle">Exactly what test cases must pass — SDD generates them</div>
+      </div>
+    </div>
+
+    <div class="yaml-block" style="margin-top:12px;">
+      <div class="yaml-header">
+        <span class="yaml-filename">06-test-spec.yaml</span>
+        <span class="yaml-badge" style="background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3);">STRONGLY RECOMMENDED</span>
+      </div>
+      <div class="yaml-body"><span class="y-section">version:</span> <span class="y-val">"1.0"</span>
+<span class="y-section">spec_type:</span> <span class="y-val">test</span>
+
+<span class="y-section">test_cases:</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">TC-001</span>
+    <span class="y-key">name:</span> <span class="y-val">snyk_critical_dependency_fixed</span>
+    <span class="y-key">description:</span> <span class="y-val">"Snyk finds critical vulnerability in dependency.
+                 ARIA allows. AutoFixAgent upgrades version. Build retriggers."</span>
+    <span class="y-key">given:</span>
+      <span class="y-key">snyk_webhook:</span> <span class="y-val">CVE-2024-1234, log4j-core:2.14.1, CRITICAL</span>
+      <span class="y-key">aria_decision:</span> <span class="y-val">ALLOW (agent trustScore 0.82)</span>
+      <span class="y-key">file_content:</span> <span class="y-val">pom.xml containing log4j-core:2.14.1</span>
+    <span class="y-key">then:</span>
+      <span class="y-key">- fix_committed:</span> <span class="y-val">true — pom.xml now contains 2.17.1</span>
+      <span class="y-key">- pr_comment_added:</span> <span class="y-val">true</span>
+      <span class="y-key">- jules_retriggered:</span> <span class="y-val">true</span>
+      <span class="y-key">- slack_sent:</span> <span class="y-val">true</span>
+      <span class="y-key">- agent_reasoning_not_null:</span> <span class="y-val">true</span>
+      <span class="y-key">- audit_log_written:</span> <span class="y-val">true (status=FIXED)</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">TC-002</span>
+    <span class="y-key">name:</span> <span class="y-val">auth_file_blocked</span>
+    <span class="y-key">description:</span> <span class="y-val">"Scanner finds issue in SecurityConfig.java. ARIA blocks. Engineer notified."</span>
+    <span class="y-key">given:</span>
+      <span class="y-key">snyk_webhook:</span> <span class="y-val">any issue in SecurityConfig.java</span>
+      <span class="y-key">aria_decision:</span> <span class="y-val">BLOCK (BLOCK-001 rule)</span>
+    <span class="y-key">then:</span>
+      <span class="y-key">- fix_committed:</span> <span class="y-val">false</span>
+      <span class="y-key">- slack_sent:</span> <span class="y-val">true (escalation message)</span>
+      <span class="y-key">- audit_log_written:</span> <span class="y-val">true (status=BLOCKED)</span>
+      <span class="y-key">- jules_NOT_retriggered:</span> <span class="y-val">true</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">TC-003</span>
+    <span class="y-key">name:</span> <span class="y-val">invalid_webhook_signature_rejected</span>
+    <span class="y-key">given:</span>
+      <span class="y-key">webhook_signature:</span> <span class="y-val">invalid HMAC</span>
+    <span class="y-key">then:</span>
+      <span class="y-key">- response_status:</span> <span class="y-val">401</span>
+      <span class="y-key">- attempt_logged:</span> <span class="y-val">true</span>
+      <span class="y-key">- orchestrator_NOT_called:</span> <span class="y-val">true</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">TC-004</span>
+    <span class="y-key">name:</span> <span class="y-val">low_confidence_fix_not_committed</span>
+    <span class="y-key">given:</span>
+      <span class="y-key">agent_confidence:</span> <span class="y-val">0.60 (below 0.70 threshold)</span>
+    <span class="y-key">then:</span>
+      <span class="y-key">- fix_committed:</span> <span class="y-val">false</span>
+      <span class="y-key">- status:</span> <span class="y-val">FAILED</span>
+      <span class="y-key">- engineer_notified:</span> <span class="y-val">true (agent not confident — manual review)</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">TC-005</span>
+    <span class="y-key">name:</span> <span class="y-val">sonar_bug_fixed</span>
+    <span class="y-key">given:</span>
+      <span class="y-key">sonar_webhook:</span> <span class="y-val">BUG, MEDIUM severity, NullPointerException in UserService.java</span>
+      <span class="y-key">aria_decision:</span> <span class="y-val">ALLOW (ALLOW-002 rule)</span>
+    <span class="y-key">then:</span>
+      <span class="y-key">- fix_committed:</span> <span class="y-val">true</span>
+      <span class="y-key">- fixed_file:</span> <span class="y-val">UserService.java (null check added)</span>
+
+  <span class="y-key">- id:</span> <span class="y-val">TC-006</span>
+    <span class="y-key">name:</span> <span class="y-val">tenant_isolation_verified</span>
+    <span class="y-key">description:</span> <span class="y-val">"Auto-fix log for tenant A not visible to tenant B"</span>
+    <span class="y-key">given:</span>
+      <span class="y-key">two_tenants:</span> <span class="y-val">tenant-A and tenant-B each with autofix logs</span>
+    <span class="y-key">then:</span>
+      <span class="y-key">tenant_A_cannot_see_tenant_B_logs:</span> <span class="y-val">true (Oracle VPD enforced)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROCESS ══ -->
+<div class="page" id="pg-process">
+  <div class="ph">
+    <span class="ptag ta">PROCESS — WHAT SDD DOES WITH YOUR INPUT</span>
+    <div class="ptitle">The 7 Stages SDD Executes Internally</div>
+    <div class="psub">You provide the 6 spec files. SDD runs these 7 stages automatically. You do not control these stages — you only control the inputs.</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">SDD INTERNAL PIPELINE — 7 STAGES</div>
+    <div class="process-flow" id="process-flow"></div>
+  </div>
+
+  <div class="callout ca">
+    <div class="callout-title">WHAT SDD DECIDES (YOU DO NOT CONTROL)</div>
+    <div class="callout-text">
+      SDD decides: class names and structure · method signatures · Spring annotations · Oracle query patterns · test structure · how to handle edge cases · package layout.<br/><br/>
+      You decide: what the system does · what rules apply · what success looks like · what integrations exist · what data to store.
+    </div>
+  </div>
+</div>
+
+<!-- ══ OUTPUT ══ -->
+<div class="page" id="pg-output">
+  <div class="ph">
+    <span class="ptag tg">OUTPUT — WHAT SDD GENERATES</span>
+    <div class="ptitle">What You Get Back</div>
+    <div class="psub">For the CI/CD auto-fix use case, SDD generates these files. Engineer reviews every line before merging.</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">GENERATED FILE LIST — CI/CD AUTO-FIX MODULE</div>
+    <div class="code"><span class="cmt"># What SDD generates from your 6 spec files</span>
+
+aces-api/src/main/java/com/jpmc/aces/api/webhook/
+├── <span class="cls">JulesWebhookController</span>.java          <span class="cmt"># POST /api/v1/webhooks/jules</span>
+├── <span class="cls">SnykWebhookController</span>.java           <span class="cmt"># POST /api/v1/webhooks/snyk</span>
+├── <span class="cls">SonarWebhookController</span>.java          <span class="cmt"># POST /api/v1/webhooks/sonar</span>
+├── <span class="cls">RavenWebhookController</span>.java          <span class="cmt"># POST /api/v1/webhooks/raven</span>
+├── <span class="cls">JulesWebhookMapper</span>.java              <span class="cmt"># Jules JSON → ScanResultEvent</span>
+├── <span class="cls">SnykWebhookMapper</span>.java               <span class="cmt"># Snyk JSON → ScanResultEvent</span>
+├── <span class="cls">SonarWebhookMapper</span>.java              <span class="cmt"># Sonar JSON → ScanResultEvent</span>
+└── <span class="cls">WebhookSignatureValidator</span>.java       <span class="cmt"># HMAC-SHA256 validation</span>
+
+aces-core/src/main/java/com/jpmc/aces/core/autofix/
+├── <span class="cls">AutoFixOrchestrator</span>.java             <span class="cmt"># Main coordinator</span>
+├── <span class="cls">AutoFixRiskEvaluator</span>.java            <span class="cmt"># ARIA risk rules from policy-spec</span>
+├── <span class="cls">AutoFixAgent</span>.java                    <span class="cmt"># AgentPlugin impl (Spring AI)</span>
+├── <span class="cls">GitCommitService</span>.java                <span class="cmt"># Reads file, commits fix</span>
+├── <span class="cls">JulesRetriggerService</span>.java           <span class="cmt"># Retriggers Jules pipeline</span>
+├── <span class="cls">AutoFixNotificationService</span>.java      <span class="cmt"># Slack + JIRA notifications</span>
+├── <span class="cls">ScanResultEvent</span>.java                 <span class="cmt"># Record (from functional-spec)</span>
+├── <span class="cls">AutoFixResult</span>.java                   <span class="cmt"># Record (from functional-spec)</span>
+└── <span class="cls">AutoFixStatus</span>.java                   <span class="cmt"># Enum: FIXED/BLOCKED/FAILED/ESCALATED</span>
+
+aces-core/src/test/
+├── <span class="cls">AutoFixOrchestratorTest</span>.java         <span class="cmt"># TC-001 through TC-006 from test-spec</span>
+├── <span class="cls">AutoFixAgentTest</span>.java                <span class="cmt"># Agent unit tests</span>
+├── <span class="cls">SnykWebhookMapperTest</span>.java           <span class="cmt"># Mapping tests</span>
+└── <span class="cls">AutoFixOrchestratorIT</span>.java           <span class="cmt"># Integration test (Oracle)</span>
+
+db/migration/
+└── V9__create_aces_autofix_log.sql       <span class="cmt"># From functional-spec + architecture-spec</span>
+
+application.yml additions                 <span class="cmt"># From architecture-spec</span>
+plugin.json                               <span class="cmt"># AutoFixAgent plugin manifest</span>
+generation-report.md                      <span class="cmt"># What was generated, assumptions, risks</span></div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">EXAMPLE GENERATED GENERATION REPORT</div>
+    <div class="code"><span class="cmt"># generation-report.md — SDD writes this after generation</span>
+
+<span class="kw">## ACES AutoFix Module — Generation Report</span>
+
+<span class="str">Generated: 2025-01-15 14:32:00
+Spec version: 1.0
+Duration: 47 seconds
+Status: SUCCESS with warnings</span>
+
+<span class="kw">## Files Generated: 17</span>
+<span class="str">- 8 Java source files
+- 4 Java test files
+- 1 Flyway migration
+- 1 application.yml addition
+- 1 plugin.json
+- 1 generation-report.md (this file)</span>
+
+<span class="kw">## Assumptions Made (ENGINEER MUST VERIFY)</span>
+<span class="ann">⚠ ASSUMPTION-001:</span> <span class="str">Raven payload format not fully specified in integration-spec.yaml.
+  Generated a generic mapper with TODO comments. Engineer must fill in actual
+  Raven field paths before RavenWebhookController is functional.</span>
+
+<span class="ann">⚠ ASSUMPTION-002:</span> <span class="str">Jules retrigger API endpoint not specified.
+  Generated JulesRetriggerService with placeholder URL:
+  POST ${JULES_BASE_URL}/api/pipelines/{pipelineId}/retrigger
+  Engineer must verify this matches actual Jules API.</span>
+
+<span class="ann">⚠ ASSUMPTION-003:</span> <span class="str">GitHub Enterprise base URL assumed to be internal.
+  If your GitHub uses a non-standard API path, update GitCommitService.</span>
+
+<span class="kw">## Test Coverage</span>
+<span class="str">TC-001 ✓ snyk_critical_dependency_fixed
+TC-002 ✓ auth_file_blocked
+TC-003 ✓ invalid_webhook_signature_rejected
+TC-004 ✓ low_confidence_fix_not_committed
+TC-005 ✓ sonar_bug_fixed
+TC-006 ✓ tenant_isolation_verified</span>
+
+<span class="kw">## Risk Flags (ARIA pre-generation scan)</span>
+<span class="ann">🔵 INFO:</span> <span class="str">AutoFixAgent has trustScore 0.30 (new agent).
+  Will be EXPERIMENTAL until 10 clean auto-fixes complete.
+  All fixes will be ALLOW_WITH_WARNING until trust score reaches 0.55.</span>
+
+<span class="kw">## Next Steps for Engineer</span>
+<span class="str">1. Verify Raven payload format and update RavenWebhookMapper.java
+2. Verify Jules retrigger API endpoint in JulesRetriggerService.java
+3. Run: mvn test -pl aces-core,aces-api (all tests should pass)
+4. Register AutoFixAgent: POST /api/v1/plugins with plugin.json
+5. Test with real Jules webhook in dev environment</span></div>
+  </div>
+</div>
+
+<!-- ══ FULL SPEC ══ -->
+<div class="page" id="pg-spec">
+  <div class="ph">
+    <span class="ptag tp">THE COMPLETE SPEC PACKAGE</span>
+    <div class="ptitle">Everything in One Place</div>
+    <div class="psub">This is the complete set of inputs you hand to SDD. Six files. One folder. SDD runs. Working code comes out.</div>
+  </div>
+
+  <div class="callout cp">
+    <div class="callout-title">FOLDER STRUCTURE TO HAND SDD</div>
+    <div class="callout-text">Create a folder called <strong>specs/cicd-autofix/</strong> in your ACES repo. Put all six files in it. Run SDD pointing at that folder. That is it.</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">SPEC CHECKLIST — BEFORE YOU RUN SDD</div>
+    <table class="tbl">
+      <thead><tr><th>File</th><th>Status</th><th>Who Fills It In</th><th>Time to Write</th><th>Most Critical Field</th></tr></thead>
+      <tbody>
+        <tr><td style="font-family:var(--mono);color:var(--blue)">01-business-spec.yaml</td><td style="color:var(--green)">✓ Template ready</td><td>Santosh (Product Lead)</td><td>30 min</td><td>goal.primary — the one-sentence problem statement</td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--blue)">02-functional-spec.yaml</td><td style="color:var(--green)">✓ Template ready</td><td>Architect + BE Lead</td><td>2 hours</td><td>agents[0].output.required_fields — agentReasoning mandatory</td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--red)">03-integration-spec.yaml</td><td style="color:var(--red)">⚠ Needs Jules payload</td><td>DevOps + BE Integration</td><td>3 hours</td><td>ci_cd.event_payload_example — actual Jules webhook format</td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--blue)">04-policy-spec.yaml</td><td style="color:var(--green)">✓ Template ready</td><td>Santosh + Security lead</td><td>1 hour</td><td>block_rules — which files are never auto-fixed</td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--green)">05-architecture-spec.yaml</td><td style="color:var(--green)">✓ Already defined</td><td>Architect</td><td>20 min</td><td>new_vault_secrets — all credentials listed</td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--blue)">06-test-spec.yaml</td><td style="color:var(--amber)">⚠ Add more cases</td><td>QA + BE Lead</td><td>1 hour</td><td>TC-001 happy path — must match your Jules real payload</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout cr">
+    <div class="callout-title">THE ONE THING THAT WILL BLOCK YOU</div>
+    <div class="callout-text">The integration-spec.yaml Raven section says TBD. And the Jules payload format needs your team to fill in the actual fields. Everything else can be generated with what you have. But if you run SDD without the real Jules and Raven payload format, the generated webhook mappers will have TODOs that the engineer must fill in manually. Get those two formats from your DevOps team before running SDD.</div>
+  </div>
+</div>
+
+<!-- ══ JULES ══ -->
+<div class="page" id="pg-jules">
+  <div class="ph">
+    <span class="ptag ta">JULES INTEGRATION</span>
+    <div class="ptitle">Jules-Specific Additions to the Spec</div>
+    <div class="psub">Jules is your CI/CD wrapper on Jenkins. These are the Jules-specific fields your team must add to the integration spec and the generated code that handles Jules specifically.</div>
+  </div>
+
+  <div class="callout ca">
+    <div class="callout-title">WHAT YOUR TEAM MUST FIND OUT ABOUT JULES</div>
+    <div class="callout-text">Before running SDD, your DevOps engineer must answer these four questions by checking the Jules documentation or asking the Jules team:<br/><br/>
+    1. What is the exact webhook payload format Jules sends on a stage failure?<br/>
+    2. What authentication does Jules use for outbound webhooks? (HMAC? Bearer? Custom header?)<br/>
+    3. What is the Jules API endpoint to retrigger a pipeline? (POST /api/pipelines/{id}/retrigger?)<br/>
+    4. How does Jules report which scanner failed and what the results are — inline in the webhook or via a separate results URL?</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">JULES WEBHOOK INTEGRATION — GENERATED CODE PATTERN</div>
+    <div class="code"><span class="ann">@RestController</span>
+<span class="ann">@RequestMapping</span>(<span class="str">"/api/v1/webhooks"</span>)
+<span class="kw">public class</span> <span class="cls">JulesWebhookController</span> {
+
+  <span class="kw">private final</span> <span class="cls">WebhookSignatureValidator</span> signatureValidator;
+  <span class="kw">private final</span> <span class="cls">JulesWebhookMapper</span> mapper;
+  <span class="kw">private final</span> <span class="cls">AutoFixOrchestrator</span> orchestrator;
+
+  <span class="ann">@PostMapping</span>(<span class="str">"/jules"</span>)
+  <span class="ann">@WithSpan</span>
+  <span class="kw">public</span> <span class="cls">ResponseEntity</span>&lt;<span class="cls">Void</span>&gt; receiveJulesEvent(
+      <span class="ann">@RequestHeader</span>(<span class="str">"X-Jules-Signature"</span>) <span class="cls">String</span> signature,
+      <span class="ann">@RequestBody</span> <span class="cls">String</span> rawPayload) {
+
+    <span class="cmt">// 1. Validate Jules webhook signature</span>
+    <span class="kw">if</span> (!signatureValidator.validate(rawPayload, signature, <span class="str">"jules"</span>)) {
+      log.warn(<span class="str">"Invalid Jules webhook signature — rejecting"</span>);
+      <span class="kw">return</span> <span class="cls">ResponseEntity</span>.status(<span class="num">401</span>).build();
+    }
+
+    <span class="cmt">// 2. Map Jules payload → ScanResultEvent</span>
+    <span class="cls">ScanResultEvent</span> event = mapper.map(rawPayload);
+
+    <span class="cmt">// 3. Process async — return 202 immediately to Jules</span>
+    <span class="cmt">// Jules expects fast response — do NOT block on auto-fix</span>
+    orchestrator.processAsync(event);
+
+    <span class="kw">return</span> <span class="cls">ResponseEntity</span>.accepted().build();
+  }
+}
+
+<span class="cmt">// Jules Retrigger — what SDD generates based on your spec</span>
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="cls">JulesRetriggerService</span> {
+
+  <span class="ann">@WithSpan</span>
+  <span class="kw">public void</span> retrigger(<span class="cls">String</span> pipelineId, <span class="cls">String</span> prId) {
+    <span class="cmt">// TODO: ENGINEER MUST VERIFY THIS URL AGAINST ACTUAL JULES API</span>
+    <span class="cls">String</span> url = julesBaseUrl + <span class="str">"/api/pipelines/"</span> + pipelineId + <span class="str">"/retrigger"</span>;
+    restClient.post()
+      .uri(url)
+      .header(<span class="str">"Authorization"</span>, <span class="str">"Bearer "</span> + julesApiToken)
+      .body(<span class="cls">Map</span>.of(<span class="str">"prId"</span>, prId, <span class="str">"triggeredBy"</span>, <span class="str">"ACES-AutoFix"</span>))
+      .retrieve()
+      .toBodilessEntity();
+    log.info(<span class="str">"Jules pipeline retriggered: pipelineId={}, prId={}"</span>, pipelineId, prId);
+  }
+}</div>
+  </div>
+
+  <div class="dw">
+    <div class="dt">WHAT TO ADD TO integration-spec.yaml FOR JULES RETRIGGER</div>
+    <div class="code"><span class="y-section">jules_api:</span> <span class="y-cmt"># Add this section to 03-integration-spec.yaml</span>
+  <span class="y-key">base_url:</span> <span class="y-val">${JULES_BASE_URL}</span> <span class="y-cmt"># from Vault</span>
+  <span class="y-key">auth:</span> <span class="y-val">Bearer token in Authorization header</span>
+  <span class="y-key">retrigger_endpoint:</span> <span class="y-val">POST /api/pipelines/{pipelineId}/retrigger</span>
+  <span class="y-cmt">  # ↑ TEAM MUST VERIFY THIS IS THE CORRECT JULES ENDPOINT</span>
+  <span class="y-key">retrigger_body:</span>
+    <span class="y-key">prId:</span> <span class="y-val">string</span>
+    <span class="y-key">triggeredBy:</span> <span class="y-val">"ACES-AutoFix"</span>
+  <span class="y-key">expected_response:</span> <span class="y-val">200 or 202</span></div>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const processSteps = [
+  {n:'1',color:'var(--blue)',stage:'Parse + Schema Validate',owner:'SDD Framework',
+   desc:'Reads all 6 YAML files. Validates each against JSON Schema. If any file is malformed or missing required fields, SDD stops here and returns a validation error listing exactly what is wrong. Nothing is generated until all 6 files are valid.',
+   decisions:[]},
+  {n:'2',color:'var(--blue)',stage:'Build Intermediate Representation (IR)',owner:'SDD Framework',
+   desc:'Converts all 6 YAML specs into a single SystemIR object — a strictly-typed Java object graph. This is the single source of truth for all subsequent stages. Same 6 files always produce the same IR. The IR is deterministic.',
+   decisions:[]},
+  {n:'3',color:'var(--amber)',stage:'DAG Planning',owner:'SDD Framework',
+   desc:'Breaks the IR into a task graph (DAG). Each node is one generation task: generate WebhookController, generate AutoFixOrchestrator, generate Flyway migration, etc. Dependencies resolved. Common infrastructure generates first.',
+   decisions:[]},
+  {n:'4',color:'var(--blue)',stage:'ARIA Pre-Generation Validation',owner:'ARIA',
+   desc:'Before generating any code, ARIA evaluates the spec itself for risk. Checks: does the spec violate any platform policies? Are the policy rules in policy-spec.yaml internally consistent? Is the agent being registered trustable? Returns ALLOW or flags issues.',
+   decisions:[
+     {text:'ARIA ALLOW → proceed to generation',color:'var(--green)',bg:'rgba(52,211,153,0.08)'},
+     {text:'ARIA FLAG → SDD adds warning to generation report, proceeds',color:'var(--amber)',bg:'rgba(245,158,11,0.08)'},
+     {text:'ARIA BLOCK → SDD stops, returns error with reason',color:'var(--red)',bg:'rgba(248,113,113,0.08)'},
+   ]},
+  {n:'5',color:'var(--green)',stage:'Code Generation (Templates + LLM)',owner:'SDD Framework',
+   desc:'For each task node in the DAG: Freemarker template provides the architectural skeleton (package, class structure, Spring annotations, Oracle patterns). LLM fills in the business logic from the spec. Every generated class follows CLAUDE.md conventions automatically.',
+   decisions:[]},
+  {n:'6',color:'var(--amber)',stage:'Validate + Auto-Fix Loop',owner:'SDD Framework',
+   desc:'Compiles generated code. Runs generated tests from test-spec.yaml. If any test fails, feeds the failure back to the LLM with the test output. LLM fixes the code. Retry up to 3 times. If still failing after 3 iterations, marks that component as NEEDS_REVIEW in generation report.',
+   decisions:[
+     {text:'All tests pass → proceed',color:'var(--green)',bg:'rgba(52,211,153,0.08)'},
+     {text:'Tests fail → auto-fix loop (max 3 iterations)',color:'var(--amber)',bg:'rgba(245,158,11,0.08)'},
+     {text:'Still failing → NEEDS_REVIEW flag in report, engineer fixes',color:'var(--red)',bg:'rgba(248,113,113,0.08)'},
+   ]},
+  {n:'7',color:'var(--green)',stage:'Output + Generation Report',owner:'SDD Framework',
+   desc:'Writes all generated files to the target directory. Creates generation-report.md listing: all files generated, assumptions made (engineer must verify), test coverage, risk flags from ARIA, and next steps. Engineer reviews the report before reviewing any code.',
+   decisions:[]},
+];
+const pf = document.getElementById('process-flow');
+processSteps.forEach(s => {
+  pf.innerHTML += `
+  <div class="pf-step">
+    <div class="pf-left">
+      <div class="pf-circle" style="background:${s.color}15;color:${s.color};border:1px solid ${s.color}30;">${s.n}</div>
+      <div class="pf-line" style="background:var(--border);"></div>
+    </div>
+    <div class="pf-content">
+      <div class="pf-header">
+        <span class="pf-stage" style="color:${s.color}">${s.stage}</span>
+        <span class="pf-owner">${s.owner}</span>
+      </div>
+      <div class="pf-desc">
+        ${s.desc}
+        ${s.decisions.length>0?`<div class="pf-decision">${s.decisions.map(d=>`<span class="pf-dec" style="background:${d.bg};color:${d.color};border:1px solid ${d.color}30">${d.text}</span>`).join('')}</div>`:''}
+      </div>
+    </div>
+  </div>`;
+});
+</script>
+</body>
+</html>
